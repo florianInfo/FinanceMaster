@@ -1,7 +1,9 @@
 # FinanceMaster
-### Lancer le serveur : npm run dev
+1# Lancer le serveur : **npm run dev**
 si npm n'est pas reconnu il faut installer nodejs
 
-### Se connecter à l'addresse : localhost:3000
+2# Se connecter à l'addresse : **localhost:3000**
 dans le navigateur
+
+# Diagramme
 ![Drag Racing](Example.png)

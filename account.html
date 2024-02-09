@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>My Website</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="icon" href="./favicon.ico" type="image/x-icon">
+  </head>
+  <body>
+    <main>
+        <h1>Charger un CSV</h1> 
+		<input type="file" name="my_file" id="my-file" accept=".csv" onchange="loadCSV(event)">
+		<div id="container"></div>
+    </main>
+	<script>
+	
+	function findMinDatePayment(tab){
+		var min = 80000000000000
+		var index = 0
+		for(let i=0;i<tab.length;i++){
+			if(tab[i].datetimestamp < min){
+				index = i
+				min = tab[i].datetimestamp
+			}
+		}
+		return index;
+	}
+	
+	function sortByDate(payments){
+		var tempTab = JSON.parse(JSON.stringify(payments));
+		var finalTab = []
+		
+		for(let i=0;i<payments.length;i++){
+			var indexMin = findMinDatePayment(tempTab)
+			finalTab[i] = tempTab[indexMin]
+			tempTab.splice(indexMin, 1);
+		}
+		return finalTab
+	}
+	
+	function loadCSV(e){
+		e = e || window.event;
+		var target = e.target || e.srcElement;
+	
+		console.log(target.files[0])
+		
+		var reader = new FileReader();
+		
+		reader.addEventListener('load', function (e) {
+			var textContent = e.target.result;
+			var paymentsLines = textContent.split("\n")
+			var finalJson = []
+			for(let i=1;i<paymentsLines.length-1; i++){
+				const line = paymentsLines[i].split(";");
+				var date = ''
+				if(line[0].includes("/")){
+					var parts = line[0].split("/");
+					date = Date.parse(new Date(parseInt(parts[2], 10),
+							parseInt(parts[1], 10) - 1,
+							parseInt(parts[0], 10)))
+				}
+				else{
+					date = Date.parse(line[0])
+				}
+				
+				var datetimestamp = date
+				var debiteur = line[1]
+				var category = line[2]
+				var debit = parseFloat(line[3])
+				var credit = parseFloat(line[4])
+				var paymentJson = {
+					datetimestamp: datetimestamp,
+					debiteur: debiteur,
+					category: category,
+					debit: debit,
+					credit: credit
+				}
+				finalJson.push(paymentJson)
+			}
+			
+			console.log(finalJson)
+			
+			finalJson = sortByDate(finalJson)
+			
+			var container = document.getElementById("container")
+			console.log(container)
+			for(let i=0;i<finalJson.length;i++){
+				var para = document.createTextNode(new Date(finalJson[i].datetimestamp))
+				var paymentContainer = document.createElement("div");
+				paymentContainer.appendChild(para);
+				container.appendChild(paymentContainer);
+			}
+			
+			console.log(finalJson)
+			
+			var jsonData = JSON.stringify(finalJson);
+			
+			
+			var a = document.createElement("a");
+			var file = new Blob([jsonData], {type: "text/plain"});
+			a.href = URL.createObjectURL(file);
+			a.download = 'jsonData.txt';
+			a.click();
+			
+			console.log(file)
+		})
+    
+    
+		
+		reader.readAsBinaryString(target.files[0]);
+	}
+
+	</script>
+  </body>
+</html>

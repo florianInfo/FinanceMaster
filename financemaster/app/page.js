@@ -23,7 +23,7 @@ class Home extends React.Component{
   render(){
     return (
       <div className="app-container">
-        <h1>Hello World</h1>
+        <h1>Finance Master</h1>
         <AdminPanel onDataChange={this.onload}></AdminPanel>
         {'total : ' + this.state.paymentsList.length}
       </div>

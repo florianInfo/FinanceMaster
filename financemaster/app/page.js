@@ -22,10 +22,10 @@ class Home extends React.Component{
 
   render(){
     return (
-      <div className="container">
+      <div className="app-container">
         <h1>Hello World</h1>
         <AdminPanel onDataChange={this.onload}></AdminPanel>
-        {this.state.paymentsList[0]?.datetimestamp || "pas de paiement"}
+        {'total : ' + this.state.paymentsList.length}
       </div>
     );
   }

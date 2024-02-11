@@ -7,6 +7,8 @@ class AdminPanel extends React.Component {
     constructor() {
         super()
         this.loadCSV = this.loadCSV.bind(this)
+        this.loadJson = this.loadJson.bind(this)
+        this.saveFile = this.saveFile.bind(this)
         this.csvToJson = this.csvToJson.bind(this)
         this.findMinDatePaymentInTab = this.findMinDatePaymentInTab.bind(this)
         this.state = {
@@ -63,6 +65,7 @@ findMinDatePaymentInTab(paymentTab){
 }
 
 sortJsonPaymentsByDate(payments){
+    console.log("[sort by date] - entrée : ", payments)
     var tempTab = JSON.parse(JSON.stringify(payments));
     var finalTab = []
     
@@ -71,6 +74,7 @@ sortJsonPaymentsByDate(payments){
         finalTab[i] = tempTab[indexMin]
         tempTab.splice(indexMin, 1);
     }
+    console.log("[sort by date] - sortie : ", finalTab)
     return finalTab
 }
 
@@ -78,32 +82,70 @@ loadCSV(e) {
     e = e || window.event;
     const target = e.target || e.srcElement;
 
-    console.log(target.files[0].name)
-
     var reader = new FileReader();
     reader.addEventListener('load', function (e) {
-        console.log(e)
         var jsonData = this.csvToJson(e.target.result)
-        var finalJson = this.sortJsonPaymentsByDate(jsonData)
         var historyTab = [...this.state.history, 'File ' + e.currentTarget.filename + ' loaded']
-        var paymentTab = [...this.state.paymentList, ...finalJson]
+        var paymentTab = [...this.state.paymentList, ...jsonData]
         this.setState({history: historyTab})
-        this.setState({paymentList: paymentTab}, () => this.props.onDataChange(this.state.paymentList))
+        this.setState({paymentList: paymentTab}, () => this.updatePaymentsList())
         
     }.bind(this))
     reader.filename = target.files[0].name
     reader.readAsBinaryString(target.files[0]);
 }
+
+loadJson(e) {
+    e = e || window.event;
+    const target = e.target || e.srcElement;
+
+    var reader = new FileReader();
+    reader.addEventListener('load', function (e) {
+        var jsonData = JSON.parse(e.target.result)
+        var historyTab = [...this.state.history, 'File ' + e.currentTarget.filename + ' loaded']
+        var paymentTab = [...this.state.paymentList, ...jsonData]
+        this.setState({history: historyTab})
+        this.setState({paymentList: paymentTab}, () => this.updatePaymentsList())
+        
+    }.bind(this))
+    reader.filename = target.files[0].name
+    reader.readAsBinaryString(target.files[0]);
+}
+
+updatePaymentsList() {
+    this.setState({paymentList: this.sortJsonPaymentsByDate(this.state.paymentList)}, () => this.props.onDataChange(this.state.paymentList))
+}
+
+saveFile() {
+    var jsonData = JSON.stringify(this.state.paymentList)
+    console.log("[save file] - contenu à sauvegarder : ", jsonData)
+    var a = document.createElement("a");
+    var file = new Blob([jsonData], {type: "application/json"});
+    a.href = URL.createObjectURL(file);
+    a.download = 'jsonData.json';
+    a.click();
+    var historyTab = [...this.state.history, 'File saved with ' + this.state.paymentList.length + "payment(s)"]
+    this.setState({history: historyTab})
+}
  
 render() {
     return (
             <div className="adminPanel-container">
-                <input type="file" name="csvFile" id="csvFile" accept=".csv" onChange={this.loadCSV}/>
-                <div>
+                <div className="container">
+                    <h4>Load CSV</h4>
+                    <input type="file" name="csvFile" id="csvFile" accept=".csv" onChange={this.loadCSV}/>
+                    <h4>Load Json</h4>
+                    <input type="file" name="jsonFile" id="jsonFile" accept=".json" onChange={this.loadJson}/>
+                </div>
+                <div className="container">
                     <h4>Historique</h4>
-                    <div className="history-container">
+                    <div className="history-list">
                         {this.state.history.map((history, index) => <p key={index}>{history}</p>)}
                     </div>
+                </div>
+                <div className="container">
+                    <h4>Save data</h4>
+                    <button onClick={this.saveFile}>Sauvegarder le fichier</button>
                 </div>
             </div>
     )

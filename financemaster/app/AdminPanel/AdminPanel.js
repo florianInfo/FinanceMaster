@@ -1,4 +1,5 @@
 'use client'
+import moment from 'moment'
 import React from "react";
 import './AdminPanel.css'
 
@@ -34,15 +35,16 @@ csvToJson(csvText){
             date = Date.parse(line[0])
         }
         
-        var datetimestamp = date
+        var datetimestamp = moment(date)
+        console.log(datetimestamp)
         var debiteur = line[1]
         var category = line[2]
         var debit = parseFloat(line[3])
         var credit = parseFloat(line[4])
         var paymentJson = {
-            datetimestamp: datetimestamp,
+            date: datetimestamp,
             debiteur: debiteur,
-            category: category,
+            categories: [category],
             debit: debit,
             credit: credit
         }
@@ -53,12 +55,12 @@ csvToJson(csvText){
 }
 
 findMinDatePaymentInTab(paymentTab){
-    var min = 80000000000000
+    var min = moment("2100-01-01")
     var index = 0
     for(let i=0;i<paymentTab.length;i++){
-        if(paymentTab[i].datetimestamp < min){
+        if(moment(paymentTab[i].date).isBefore(min, )){
             index = i
-            min = paymentTab[i].datetimestamp
+            min = paymentTab[i].date
         }
     }
     return index;
@@ -93,6 +95,7 @@ loadCSV(e) {
     }.bind(this))
     reader.filename = target.files[0].name
     reader.readAsBinaryString(target.files[0]);
+    target.value = ""
 }
 
 loadJson(e) {
@@ -106,6 +109,7 @@ loadJson(e) {
         var paymentTab = [...this.state.paymentList, ...jsonData]
         this.setState({history: historyTab})
         this.setState({paymentList: paymentTab}, () => this.updatePaymentsList())
+       
         
     }.bind(this))
     reader.filename = target.files[0].name
@@ -113,7 +117,7 @@ loadJson(e) {
 }
 
 updatePaymentsList() {
-    this.setState({paymentList: this.sortJsonPaymentsByDate(this.state.paymentList)}, () => this.props.onDataChange(this.state.paymentList))
+    this.setState({paymentList: this.state.paymentList}, () => this.props.onDataChange(this.state.paymentList))
 }
 
 saveFile() {
@@ -130,22 +134,22 @@ saveFile() {
  
 render() {
     return (
-            <div className="adminPanel-container">
-                <div className="container">
-                    <h4>Load CSV</h4>
+            <div className="flex justify-around border p-2 items-center bg-gray-50 shadow-md sm:rounded-lg">
+                <div className="container basis-1/4">
+                    <h4 className='text-sm font-bold'>Load CSV</h4>
                     <input type="file" name="csvFile" id="csvFile" accept=".csv" onChange={this.loadCSV}/>
-                    <h4>Load Json</h4>
+                    <h4 className='text-sm font-bold'>Load Json</h4>
                     <input type="file" name="jsonFile" id="jsonFile" accept=".json" onChange={this.loadJson}/>
                 </div>
-                <div className="container">
-                    <h4>Historique</h4>
+                <div className="container basis-1/4">
+                    <h4 className='text-sm font-bold'>Historique</h4>
                     <div className="history-list">
                         {this.state.history.map((history, index) => <p key={index}>{history}</p>)}
                     </div>
                 </div>
-                <div className="container">
-                    <h4>Save data</h4>
-                    <button onClick={this.saveFile}>Sauvegarder le fichier</button>
+                <div className="container basis-1/4 text-center">
+                    <h4 className='text-sm font-bold'>Save data</h4>
+                    <button className='text-xs bg-red-500 text-zinc-50 p-2 rounded-md hover:bg-red-600 hover:text-sm' onClick={this.saveFile}>Sauvegarder le fichier</button>
                 </div>
             </div>
     )

@@ -36,14 +36,13 @@ csvToJson(csvText){
         }
         
         var datetimestamp = moment(date)
-        console.log(datetimestamp)
         var debiteur = line[1]
         var category = line[2]
         var debit = parseFloat(line[3])
         var credit = parseFloat(line[4])
         var paymentJson = {
             date: datetimestamp,
-            debiteur: debiteur,
+            description: debiteur,
             categories: [category],
             debit: debit,
             credit: credit

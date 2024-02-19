@@ -27,7 +27,7 @@ class PaymentsTab extends React.Component {
                                 <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                                     <td className="px-6 py-4">{moment(payment.date).format("DD/MM/YYYY")}</td>
                                     <td className="px-6 py-4">{payment.categories[0]}</td>
-                                    <td className="px-6 py-4">{payment.debiteur}</td>
+                                    <td className="px-6 py-4">{payment.description}</td>
                                     <td className="px-6 py-4">{amount}</td>
                                 </tr>
                             )

@@ -4,11 +4,13 @@ import './globals.css'
 import AdminPanel from "./AdminPanel/AdminPanel";
 import PaymentsTab from "./PaymentsTab/PaymentsTab";
 import FilterPanel from "./FilterPanel/FilterPanel";
+import moment from "moment";
 
 class Home extends React.Component{
   constructor(){
     super()
     this.onload = this.onload.bind(this)
+    this.onSearch = this.onSearch.bind(this)
     this.state = {paymentsList: [], categoriesList: [], currentPaymentList: []}
   }
 
@@ -32,6 +34,23 @@ class Home extends React.Component{
   }
 
   onSearch(searchCriteria){
+    console.log("[onSearch] entrée - ", searchCriteria)
+    this.setState({currentPaymentList: this.state.paymentsList}, () => {
+      var finalResult = this.state.currentPaymentList
+      if(searchCriteria.beginDate.isValid()){
+        finalResult = finalResult.filter(payment => moment(payment.date).isAfter(searchCriteria.beginDate))
+      }
+      if(searchCriteria.endDate.isValid()){
+        finalResult = finalResult.filter(payment => moment(payment.date).isBefore(searchCriteria.endDate))
+      }
+      if(searchCriteria.category){
+        finalResult = finalResult.filter(payment => payment.categories.includes(searchCriteria.category))
+      }
+      if(searchCriteria.description){
+        finalResult = finalResult.filter(payment => payment.description.toUpperCase() == searchCriteria.description.toUpperCase())
+      }
+      this.setState({currentPaymentList: finalResult})
+    })
     
   }
 
@@ -43,8 +62,7 @@ class Home extends React.Component{
         <AdminPanel onDataChange={this.onload}></AdminPanel>
         <FilterPanel categories={this.state.categoriesList} onSearch={this.onSearch}></FilterPanel>
         <PaymentsTab payments={this.state.currentPaymentList}></PaymentsTab>
-        {'total : ' + this.state.paymentsList.length}
-        {this.state.categoriesList.length}
+        {'total : ' + this.state.currentPaymentList.length}
       </div>
     );
   }

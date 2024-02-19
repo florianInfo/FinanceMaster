@@ -22,13 +22,12 @@ class PaymentsTab extends React.Component {
                     </thead>
                     <tbody>
                         {this.props.payments.map((payment, index) => {
-                            var amount = payment.debit > 0 ? "-" + payment.debit : "+" + payment.credit
                             return (
                                 <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                                     <td className="px-6 py-4">{moment(payment.date).format("DD/MM/YYYY")}</td>
                                     <td className="px-6 py-4">{payment.categories[0]}</td>
                                     <td className="px-6 py-4">{payment.description}</td>
-                                    <td className="px-6 py-4">{amount}</td>
+                                    <td className="px-6 py-4 underline">{payment.amount > 0 ? "+" + payment.amount: payment.amount}</td>
                                 </tr>
                             )
                         })}

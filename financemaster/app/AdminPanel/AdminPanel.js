@@ -44,8 +44,7 @@ csvToJson(csvText){
             date: datetimestamp,
             description: debiteur,
             categories: [category],
-            debit: debit,
-            credit: credit
+            amount: debit ? -debit : credit
         }
         finalJson.push(paymentJson)
     }

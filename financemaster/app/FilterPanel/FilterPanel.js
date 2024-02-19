@@ -14,7 +14,7 @@ class FilterPanel extends React.Component {
         var beginDate = document.getElementById("beginDate").value
         var endDate = document.getElementById("endDate").value
         var category = document.getElementById("categories").value
-        var description = document.getElementById("description").value
+        var description = document.getElementById("descriptions").value
 
         var searchCriteria = {
             beginDate: moment(beginDate),
@@ -50,8 +50,11 @@ class FilterPanel extends React.Component {
                 </div>
                 
                 <div>
-                    <label htmlFor="description" className="block text-sm font-medium leading-6 text-gray-900">Description</label>
-                    <input type="text" name="description" id="description"></input>
+                    <label htmlFor="descriptions" className="block text-sm font-medium leading-6 text-gray-900">Descriptions</label>
+                    <select name="descriptions" id="descriptions">
+                        <option value=""></option>
+                        {this.props.descriptions?.map((description, index) => <option key={index} value={description}>{description}</option>)}
+                    </select>
                 </div>
                 
                 <button onClick={this.search} className="text-xs bg-red-500 text-zinc-50 p-2 rounded-md hover:bg-red-600 hover:text-sm">Search</button>

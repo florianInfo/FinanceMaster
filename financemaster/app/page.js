@@ -11,7 +11,7 @@ class Home extends React.Component{
     super()
     this.onload = this.onload.bind(this)
     this.onSearch = this.onSearch.bind(this)
-    this.state = {paymentsList: [], categoriesList: [], currentPaymentList: []}
+    this.state = {paymentsList: [], categoriesList: [], descriptionsList: [], currentPaymentList: []}
   }
 
   fromJsonToCategories(paymentsList){
@@ -29,8 +29,25 @@ class Home extends React.Component{
     return finalTab
   }
 
+  fromJsonToDescription(paymentsList){
+    console.log("[fromJsonToDescription] entrée")
+    var finalTab = []
+    for(let i=0; i<paymentsList.length; i++){
+        var category = paymentsList[i].description
+        if(!finalTab.includes(category)){
+          finalTab.push(paymentsList[i].description)
+        }
+      }
+    console.log("[fromJsonToDescription] sortie - ", finalTab)
+    return finalTab
+  }
+
   onload(paymentJsonData) {
-    this.setState({paymentsList: paymentJsonData, categoriesList: this.fromJsonToCategories(paymentJsonData), currentPaymentList: paymentJsonData})
+    this.setState({
+      paymentsList: paymentJsonData,
+      categoriesList: this.fromJsonToCategories(paymentJsonData),
+      descriptionsList: this.fromJsonToDescription(paymentJsonData),
+      currentPaymentList: paymentJsonData})
   }
 
   onSearch(searchCriteria){
@@ -60,9 +77,12 @@ class Home extends React.Component{
       <div className="p-6">
         <h1 className="text-3xl font-bold mb-2">Finance Master</h1>
         <AdminPanel onDataChange={this.onload}></AdminPanel>
-        <FilterPanel categories={this.state.categoriesList} onSearch={this.onSearch}></FilterPanel>
+        <FilterPanel categories={this.state.categoriesList} descriptions={this.state.descriptionsList} onSearch={this.onSearch}></FilterPanel>
         <PaymentsTab payments={this.state.currentPaymentList}></PaymentsTab>
-        {'total : ' + this.state.currentPaymentList.length}
+        {'total : ' + this.state.currentPaymentList.length + ' payments'}
+        <div>
+          {'balance : ' + this.state.currentPaymentList.reduce((finalResult, payment) => finalResult + payment.amount, 0).toFixed(2) + '$'}
+        </div>
       </div>
     );
   }

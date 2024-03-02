@@ -18,7 +18,6 @@ class LineChart extends React.Component {
 
     populateMonths(payments) {
         var monthsTab = new Map()
-        var solde = 0
         payments.forEach(payment => {
             let date = moment(payment.date).format("YYYY-MM")
             if(!monthsTab.has(date)){
@@ -39,17 +38,40 @@ class LineChart extends React.Component {
             if(payment.description === PAYE_JESS){
                 temp.paye_jess += payment.amount
             }
-
-            // solde
-            solde += payment.amount
-            temp.solde = solde
-
             monthsTab.set(date, temp)
-
         });
+
+        // sort
         monthsTab = new Map([...monthsTab.entries()].sort());
+
+        // solde
+        var totalSolde = 0
+        monthsTab.forEach((value, date) => {
+            var temp = Object.assign({}, monthsTab.get(date));
+            console.log(temp.balance)
+            totalSolde += temp.balance
+            temp.solde = totalSolde
+            console.log(totalSolde)
+            monthsTab.set(date, temp)
+        })
         console.log("[populateMonths] - sortie ", monthsTab)
         return monthsTab
+    }
+
+    getColor(ctx){
+        console.log(ctx)
+        if(ctx.tick.value == 0){
+            return 'black'
+        }
+        return '#80808030'
+    }
+
+    getLine(ctx){
+        console.log(ctx)
+        if(ctx.tick.value == 0){
+            return 2
+        }
+        return 1
     }
 
 
@@ -96,7 +118,7 @@ class LineChart extends React.Component {
         ]  
         }
         return (
-            <div className="chart-container">
+            <div className="flex justify-around border p-2 items-center bg-gray-50 shadow-md sm:rounded-lg line-container">
                 <Line
                     data={chartData}
                     options={
@@ -115,7 +137,7 @@ class LineChart extends React.Component {
                             }
                         },
                         layout: {
-                            padding: 50
+                            padding: 0
                         },
                         scales: {
                             x: {
@@ -123,6 +145,13 @@ class LineChart extends React.Component {
                                 display: false,
                               }
                             },
+                            y: {
+                                grid: {
+                                    color: this.getColor,
+                                    lineWidth: this.getLine,
+                                    z: 2
+                                }
+                            }
                         }
                     }
                 }

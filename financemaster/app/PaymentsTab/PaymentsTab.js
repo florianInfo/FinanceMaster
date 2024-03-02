@@ -21,7 +21,7 @@ class PaymentsTab extends React.Component {
                         </tr>
                     </thead>
                     <tbody>
-                        {this.props.payments.map((payment, index) => {
+                        {this.props.payments.slice(0, 5).map((payment, index) => {
                             return (
                                 <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                                     <td className="px-6 py-4">{moment(payment.date).format("DD/MM/YYYY")}</td>

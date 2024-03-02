@@ -5,6 +5,7 @@ import AdminPanel from "./AdminPanel/AdminPanel";
 import PaymentsTab from "./PaymentsTab/PaymentsTab";
 import FilterPanel from "./FilterPanel/FilterPanel";
 import moment from "moment";
+import LineChart from "./LineChart/LineChart";
 
 class Home extends React.Component{
   constructor(){
@@ -66,7 +67,11 @@ class Home extends React.Component{
       if(searchCriteria.description){
         finalResult = finalResult.filter(payment => payment.description.toUpperCase() == searchCriteria.description.toUpperCase())
       }
-      this.setState({currentPaymentList: finalResult})
+      this.setState({
+        currentPaymentList: finalResult,
+        categoriesList: this.fromJsonToCategories(this.state.currentPaymentList),
+        descriptionsList: this.fromJsonToDescription(this.state.currentPaymentList)
+      })
     })
     
   }
@@ -83,6 +88,7 @@ class Home extends React.Component{
         <div>
           {'balance : ' + this.state.currentPaymentList.reduce((finalResult, payment) => finalResult + payment.amount, 0).toFixed(2) + '$'}
         </div>
+        <LineChart payments={this.state.currentPaymentList}></LineChart>
       </div>
     );
   }

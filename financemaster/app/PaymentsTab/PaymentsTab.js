@@ -27,7 +27,7 @@ class PaymentsTab extends React.Component {
                                     <td className="px-6 py-4">{moment(payment.date).format("DD/MM/YYYY")}</td>
                                     <td className="px-6 py-4">{payment.categories[0]}</td>
                                     <td className="px-6 py-4">{payment.description}</td>
-                                    <td className="px-6 py-4 underline">{payment.amount > 0 ? "+" + payment.amount: payment.amount}</td>
+                                    <td className="px-6 py-4 underline">{payment.amount > 0 ? "+" + payment.amount.toFixed(2): payment.amount.toFixed(2)}</td>
                                 </tr>
                             )
                         })}

@@ -36,10 +36,10 @@ csvToJson(csvText){
         }
         
         var datetimestamp = moment(date)
-        var debiteur = line[1]
-        var category = line[2]
-        var debit = parseFloat(line[3])
-        var credit = parseFloat(line[4])
+        var debiteur = line[1].replaceAll('\"', '')
+        var category = line[2].replaceAll('\"', '')
+        var debit = parseFloat(line[3].replaceAll('\"', ''))
+        var credit = parseFloat(line[4].replaceAll('\"', ''))
         var paymentJson = {
             date: datetimestamp,
             description: debiteur,

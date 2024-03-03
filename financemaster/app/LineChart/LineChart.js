@@ -48,10 +48,8 @@ class LineChart extends React.Component {
         var totalSolde = 0
         monthsTab.forEach((value, date) => {
             var temp = Object.assign({}, monthsTab.get(date));
-            console.log(temp.balance)
             totalSolde += temp.balance
             temp.solde = totalSolde
-            console.log(totalSolde)
             monthsTab.set(date, temp)
         })
         console.log("[populateMonths] - sortie ", monthsTab)
@@ -59,7 +57,6 @@ class LineChart extends React.Component {
     }
 
     getColor(ctx){
-        console.log(ctx)
         if(ctx.tick.value == 0){
             return 'black'
         }
@@ -67,7 +64,6 @@ class LineChart extends React.Component {
     }
 
     getLine(ctx){
-        console.log(ctx)
         if(ctx.tick.value == 0){
             return 2
         }

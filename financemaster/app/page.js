@@ -84,10 +84,6 @@ class Home extends React.Component{
         <AdminPanel onDataChange={this.onload}></AdminPanel>
         <FilterPanel categories={this.state.categoriesList} descriptions={this.state.descriptionsList} onSearch={this.onSearch}></FilterPanel>
         <PaymentsTab payments={this.state.currentPaymentList}></PaymentsTab>
-        {'total : ' + this.state.currentPaymentList.length + ' payments'}
-        <div>
-          {'balance : ' + this.state.currentPaymentList.reduce((finalResult, payment) => finalResult + payment.amount, 0).toFixed(2) + '$'}
-        </div>
         <LineChart payments={this.state.currentPaymentList}></LineChart>
       </div>
     );

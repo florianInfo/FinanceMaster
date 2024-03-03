@@ -12,6 +12,8 @@ class Home extends React.Component{
     super()
     this.onload = this.onload.bind(this)
     this.onSearch = this.onSearch.bind(this)
+    this.onSaveFile = this.onSaveFile.bind(this)
+    this.deleteCategory = this.deleteCategory.bind(this)
     this.state = {paymentsList: [], categoriesList: [], descriptionsList: [], currentPaymentList: []}
   }
 
@@ -27,7 +29,7 @@ class Home extends React.Component{
       }
     }
     console.log("[fromJsonToCategories] sortie - ", finalTab)
-    return finalTab
+    return finalTab.sort()
   }
 
   fromJsonToDescription(paymentsList){
@@ -40,7 +42,7 @@ class Home extends React.Component{
         }
       }
     console.log("[fromJsonToDescription] sortie - ", finalTab)
-    return finalTab
+    return finalTab.sort()
   }
 
   onload(paymentJsonData) {
@@ -50,6 +52,16 @@ class Home extends React.Component{
       descriptionsList: this.fromJsonToDescription(paymentJsonData),
       currentPaymentList: paymentJsonData})
   }
+  
+  onSaveFile() {
+    var jsonData = JSON.stringify(this.state.paymentsList)
+    console.log("[save file] - contenu à sauvegarder : ", jsonData)
+    var a = document.createElement("a");
+    var file = new Blob([jsonData], {type: "application/json"});
+    a.href = URL.createObjectURL(file);
+    a.download = 'jsonData.json';
+    a.click();
+}
 
   onSearch(searchCriteria){
     console.log("[onSearch] entrée - ", searchCriteria)
@@ -76,14 +88,33 @@ class Home extends React.Component{
     
   }
 
+  deleteCategory(idPayment, categoryIndex){
+    console.log("[deleteCategory] entrée - idPaiement : ", idPayment, ' categoryIndex : ', categoryIndex)
+    var payment = this.state.paymentsList.find((payment) => payment.id == idPayment)
+
+    var indexOfPayment = this.state.paymentsList.indexOf(payment)
+    var indexOfPaymentCurrent = this.state.currentPaymentList.indexOf(payment)
+
+    payment.categories.splice(categoryIndex, 1)
+
+    var tempList = this.state.paymentsList
+    var tempCurrent = this.state.currentPaymentList
+
+    tempList[indexOfPayment] = payment
+    tempCurrent[indexOfPaymentCurrent] = payment
+
+    console.log(payment)
+    this.setState({paymentsList: tempList, currentPaymentList: tempCurrent})
+  }
+
 
   render(){
     return (
-      <div className="p-6">
-        <h1 className="text-3xl font-bold mb-2">Finance Master</h1>
-        <AdminPanel onDataChange={this.onload}></AdminPanel>
+      <div className="p-6 pt-1 test">
+        <h1 className="text-3xl font-bold mb-2 text-center">Finance Master</h1>
+        <AdminPanel onDataChange={this.onload} onSaveFile={this.onSaveFile}></AdminPanel>
         <FilterPanel categories={this.state.categoriesList} descriptions={this.state.descriptionsList} onSearch={this.onSearch}></FilterPanel>
-        <PaymentsTab payments={this.state.currentPaymentList}></PaymentsTab>
+        <PaymentsTab payments={this.state.currentPaymentList} deleteCategory={this.deleteCategory}></PaymentsTab>
         <LineChart payments={this.state.currentPaymentList}></LineChart>
       </div>
     );

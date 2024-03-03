@@ -30,7 +30,7 @@ class FilterPanel extends React.Component {
 
     render() {
         return (
-            <div className="mt-2 flex justify-around border p-2 items-center bg-gray-50 shadow-md sm:rounded-lg">
+            <div className="mt-2 mb-2 flex justify-around border p-2 items-center shadow-md sm:rounded-lg">
                 <div>
                     <label htmlFor="beginDate" className="block text-sm font-medium leading-6 text-gray-900">Begin Date</label>
                     <input type="date" name="beginDate" id="beginDate"></input>

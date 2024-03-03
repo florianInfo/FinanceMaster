@@ -114,7 +114,7 @@ class LineChart extends React.Component {
         ]  
         }
         return (
-            <div className="flex justify-around border p-2 items-center bg-gray-50 shadow-md sm:rounded-lg line-container">
+            <div className="flex justify-around border p-2 items-center shadow-md sm:rounded-lg line-container">
                 <Line
                     data={chartData}
                     options={

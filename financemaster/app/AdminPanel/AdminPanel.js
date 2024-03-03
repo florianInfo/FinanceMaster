@@ -14,7 +14,8 @@ class AdminPanel extends React.Component {
         this.findMinDatePaymentInTab = this.findMinDatePaymentInTab.bind(this)
         this.state = {
             paymentList: [],
-            history: []
+            history: [],
+            sequence: 1
         }
     }
 
@@ -41,6 +42,7 @@ csvToJson(csvText){
         var debit = parseFloat(line[3].replaceAll('\"', ''))
         var credit = parseFloat(line[4].replaceAll('\"', ''))
         var paymentJson = {
+            id: i + this.state.sequence,
             date: datetimestamp,
             description: debiteur,
             categories: [category],
@@ -48,6 +50,7 @@ csvToJson(csvText){
         }
         finalJson.push(paymentJson)
     }
+    this.setState({sequence: this.state.sequence + paymentsLines.length})
     console.debug("[csvToJson] - fin ", finalJson)
     return finalJson
 }
@@ -105,6 +108,7 @@ loadJson(e) {
         var jsonData = JSON.parse(e.target.result)
         var historyTab = [...this.state.history, 'File ' + e.currentTarget.filename + ' loaded']
         var paymentTab = [...this.state.paymentList, ...jsonData]
+        this.setState({sequence: this.state.sequence + jsonData.length})
         this.setState({history: historyTab})
         this.setState({paymentList: paymentTab}, () => this.updatePaymentsList())
        
@@ -119,20 +123,14 @@ updatePaymentsList() {
 }
 
 saveFile() {
-    var jsonData = JSON.stringify(this.state.paymentList)
-    console.log("[save file] - contenu à sauvegarder : ", jsonData)
-    var a = document.createElement("a");
-    var file = new Blob([jsonData], {type: "application/json"});
-    a.href = URL.createObjectURL(file);
-    a.download = 'jsonData.json';
-    a.click();
+    this.props.onSaveFile()
     var historyTab = [...this.state.history, 'File saved with ' + this.state.paymentList.length + "payment(s)"]
-    this.setState({history: historyTab})
+    this.setState({history: historyTab}) 
 }
  
 render() {
     return (
-            <div className="flex justify-around border p-2 items-center bg-gray-50 shadow-md sm:rounded-lg">
+            <div className="flex justify-around border p-2 items-center shadow-md sm:rounded-lg">
                 <div className="container basis-1/4">
                     <h4 className='text-sm font-bold'>Load CSV</h4>
                     <input type="file" name="csvFile" id="csvFile" accept=".csv" onChange={this.loadCSV}/>

@@ -81,7 +81,7 @@ class Home extends React.Component{
       }
       this.setState({
         currentPaymentList: finalResult,
-        categoriesList: this.fromJsonToCategories(this.state.currentPaymentList),
+        categoriesList: this.fromJsonToCategories(this.state.paymentsList),
         descriptionsList: this.fromJsonToDescription(this.state.currentPaymentList)
       })
     })
@@ -104,7 +104,11 @@ class Home extends React.Component{
     tempCurrent[indexOfPaymentCurrent] = payment
 
     console.log(payment)
-    this.setState({paymentsList: tempList, currentPaymentList: tempCurrent})
+    this.setState({
+      paymentsList: tempList, 
+      currentPaymentList: tempCurrent,
+      categoriesList: this.fromJsonToCategories(tempList)
+    })
   }
 
 
@@ -114,7 +118,7 @@ class Home extends React.Component{
         <h1 className="text-3xl font-bold mb-2 text-center">Finance Master</h1>
         <AdminPanel onDataChange={this.onload} onSaveFile={this.onSaveFile}></AdminPanel>
         <FilterPanel categories={this.state.categoriesList} descriptions={this.state.descriptionsList} onSearch={this.onSearch}></FilterPanel>
-        <PaymentsTab payments={this.state.currentPaymentList} deleteCategory={this.deleteCategory}></PaymentsTab>
+        <PaymentsTab payments={this.state.currentPaymentList} deleteCategory={this.deleteCategory} categories={this.state.categoriesList}></PaymentsTab>
         <LineChart payments={this.state.currentPaymentList}></LineChart>
       </div>
     );

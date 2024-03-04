@@ -5,7 +5,7 @@ import './PaymentsTab.css'
 class PaymentsTab extends React.Component {
     constructor(props){
         super(props)
-        this.state = {payments: this.props.payments, nbPerPage : 5, currentPage: 1}
+        this.state = {payments: this.props.payments, nbPerPage : 5, currentPage: 1, currentVisibleCategoryChoiceIndex: -1}
     }
 
     changePage(page) {
@@ -15,6 +15,14 @@ class PaymentsTab extends React.Component {
 
     deleteCategory(idPaiement, categoryIndex){
         this.props.deleteCategory(idPaiement, categoryIndex)
+    }
+
+    openCategoryList(e, index) {
+        if(this.state.currentVisibleCategoryChoiceIndex == index){
+            index = -1
+        }
+        this.setState({currentVisibleCategoryChoiceIndex: index})
+        e.preventDefault()
     }
 
     render() {
@@ -30,16 +38,36 @@ class PaymentsTab extends React.Component {
                         </tr>
                     </thead>
                     <tbody className="shadow-md">
-                        {this.props.payments.slice((this.state.currentPage-1) * this.state.nbPerPage, (this.state.currentPage) * this.state.nbPerPage).map((payment, index) => {
+                        {this.props.payments.slice((this.state.currentPage-1) * this.state.nbPerPage, (this.state.currentPage) * this.state.nbPerPage).map((payment, paymentIndex) => {
                             return (
-                                <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                <tr key={paymentIndex} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                                     <td className="px-6 py-4">{moment(payment.date).format("DD/MM/YYYY")}</td>
                                     <td className="px-6 py-4 w-64 flex flex-wrap gap-1">{payment.categories.map((category, categoryIndex) => {
                                         return <div key={categoryIndex} className="flex gap-x-1 shadow-md rounded-md bg-gray-150 w-fit px-2">
                                             <p className="font-medium">{category}</p>
-                                            <p className="cursor-pointer" onClick={this.deleteCategory.bind(this, payment.id, categoryIndex)}>x</p>
+                                            <p className="cursor-pointer" onClick={this.deleteCategory.bind(this, payment.id, categoryIndex)}><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.2} stroke="#eb4034A2" className="w-4 h-4">
+  <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+</svg>
+</p>
                                             </div>
-                                    })}</td>
+                                    })}
+                                    <div>
+                                        <div className="cursor-pointer" onClick={(e) => this.openCategoryList(e, paymentIndex)}>
+                                            {this.state.currentVisibleCategoryChoiceIndex == paymentIndex ? <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+</svg>
+ : <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+</svg>
+}
+                                        </div>
+                                        <div className={`absolute z-50 bg-red-500 ${this.state.currentVisibleCategoryChoiceIndex == paymentIndex ? 'visible' : 'hidden'}`}>
+                                            {this.props.categories.map((category, categoryIndex) => {
+                                                return <div key={categoryIndex}>{category}</div>
+                                            } )}
+                                        </div>
+                                    </div>
+                                    </td>
                                     <td className="px-6 py-4">{payment.description}</td>
                                     <td className="px-6 py-4 underline">{payment.amount > 0 ? "+" + payment.amount.toFixed(2): payment.amount.toFixed(2)}</td>
                                 </tr>

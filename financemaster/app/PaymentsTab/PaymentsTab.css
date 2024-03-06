@@ -1,5 +1,15 @@
-
+.container{
+    z-index: 1;
+    overflow: visible;
+}
 
 .footer{
     background-color: white;
+}
+
+.selectList{
+    position: absolute;
+    max-height: 254px;
+    overflow-y: scroll;
+    z-index: 10;
 }

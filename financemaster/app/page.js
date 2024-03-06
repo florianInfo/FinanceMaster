@@ -14,6 +14,7 @@ class Home extends React.Component{
     this.onSearch = this.onSearch.bind(this)
     this.onSaveFile = this.onSaveFile.bind(this)
     this.deleteCategory = this.deleteCategory.bind(this)
+    this.addCategory = this.addCategory.bind(this)
     this.state = {paymentsList: [], categoriesList: [], descriptionsList: [], currentPaymentList: []}
   }
 
@@ -111,6 +112,30 @@ class Home extends React.Component{
     })
   }
 
+  addCategory(category, paymentId){
+    console.log("[addCategory] entrée - paymentId : ", paymentId, ' category : ', category)
+    var payment = this.state.paymentsList.find((payment) => payment.id == paymentId)
+
+    var indexOfPayment = this.state.paymentsList.indexOf(payment)
+    var indexOfPaymentCurrent = this.state.currentPaymentList.indexOf(payment)
+
+    payment.categories.push(category)
+
+    var tempList = this.state.paymentsList
+    var tempCurrent = this.state.currentPaymentList
+
+    tempList[indexOfPayment] = payment
+    tempCurrent[indexOfPaymentCurrent] = payment
+
+    console.log(payment)
+    this.setState({
+      paymentsList: tempList, 
+      currentPaymentList: tempCurrent,
+      categoriesList: this.fromJsonToCategories(tempList)
+    })
+
+  }
+
 
   render(){
     return (
@@ -118,7 +143,7 @@ class Home extends React.Component{
         <h1 className="text-3xl font-bold mb-2 text-center">Finance Master</h1>
         <AdminPanel onDataChange={this.onload} onSaveFile={this.onSaveFile}></AdminPanel>
         <FilterPanel categories={this.state.categoriesList} descriptions={this.state.descriptionsList} onSearch={this.onSearch}></FilterPanel>
-        <PaymentsTab payments={this.state.currentPaymentList} deleteCategory={this.deleteCategory} categories={this.state.categoriesList}></PaymentsTab>
+        <PaymentsTab payments={this.state.currentPaymentList} deleteCategory={this.deleteCategory} categories={this.state.categoriesList} addCategory={this.addCategory}></PaymentsTab>
         <LineChart payments={this.state.currentPaymentList}></LineChart>
       </div>
     );

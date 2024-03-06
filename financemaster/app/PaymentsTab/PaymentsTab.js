@@ -2,10 +2,17 @@ import React from "react";
 import moment from "moment";
 import './PaymentsTab.css'
 
+
 class PaymentsTab extends React.Component {
     constructor(props){
         super(props)
-        this.state = {payments: this.props.payments, nbPerPage : 5, currentPage: 1, currentVisibleCategoryChoiceIndex: -1}
+        this.state = {
+            payments: this.props.payments,
+            nbPerPage : 5,
+            currentPage: 1,
+            currentVisibleCategoryChoiceIndex: -1,
+            currentSearch: ''
+        }
     }
 
     changePage(page) {
@@ -25,9 +32,29 @@ class PaymentsTab extends React.Component {
         e.preventDefault()
     }
 
+    onSearchChange(e){
+        this.setState({currentSearch: e.target.value})
+    }
+
+    addCategory(e, paymentId, category) {
+        this.props.addCategory(category, paymentId)
+        this.setState({currentVisibleCategoryChoiceIndex: -1})
+        e.preventDefault()
+    }
+
+    addNewCategory(idPaiement, e){
+        if(e.keyCode == 13){
+            var category = e.target.value.charAt(0).toUpperCase() + e.target.value.substring(1, e.target.value.length)
+            this.props.addCategory(category, idPaiement)
+            e.target.value = ''
+            this.setState({currentSearch: '', currentVisibleCategoryChoiceIndex: -1})
+        }
+        
+    }
+
     render() {
         return (
-            <div className="relative overflow-x-auto shadow-md sm:rounded-lg mb-2">
+            <div className="relative overflow-x-auto shadow-md sm:rounded-lg mb-2 container">
                 <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 border-x-red-200">
                     <thead className="text-xs text-gray-700 uppercase bg-red-200 dark:bg-gray-700 dark:text-gray-400">
                         <tr>
@@ -61,9 +88,10 @@ class PaymentsTab extends React.Component {
 </svg>
 }
                                         </div>
-                                        <div className={`absolute z-50 bg-red-500 ${this.state.currentVisibleCategoryChoiceIndex == paymentIndex ? 'visible' : 'hidden'}`}>
-                                            {this.props.categories.map((category, categoryIndex) => {
-                                                return <div key={categoryIndex}>{category}</div>
+                                        <div className={`bg-white absolute overflow-y-auto z-50 selectList ${this.state.currentVisibleCategoryChoiceIndex == paymentIndex ? 'visible' : 'hidden'}`}>
+                                            <input className="p-1" type="text" placeholder="search..." onChange={(e) => this.onSearchChange(e)} onKeyUp={(e) => this.addNewCategory(payment.id, e)}></input>
+                                            {this.props.categories.filter(categorie => categorie.toUpperCase().includes(this.state.currentSearch.toUpperCase())).map((category, categoryIndex) => {
+                                                return <div className="p-2 cursor-pointer hover:bg-red-500 hover:text-white"key={categoryIndex} onClick={(e) => this.addCategory(e, payment.id, category)}>{category}</div>
                                             } )}
                                         </div>
                                     </div>

@@ -14,6 +14,9 @@ class LineChart extends React.Component {
 
     constructor(props) {
         super(props)
+        this.state = {
+            totalAverageBalance : 0
+        }
     }
 
     populateMonths(payments) {
@@ -54,6 +57,43 @@ class LineChart extends React.Component {
         })
         console.log("[populateMonths] - sortie ", monthsTab)
         return monthsTab
+    }
+
+    populateYears(months) {
+        var yearsTab = new Map()
+        months.forEach((value, key) => {
+           let date = moment(key).year()
+           if(!yearsTab.has(date)){
+                yearsTab.set(date, {displayableDate: date, averageBalance: 0, balances: []})
+            }
+
+            // copy item
+            var temp = Object.assign({}, yearsTab.get(date));
+
+            temp.balances.push(value.balance)
+
+            yearsTab.set(date, temp)
+        })
+
+        // sort
+        yearsTab = new Map([...yearsTab.entries()].sort());
+        
+        var totalAverageBalance = 0
+        var nbMonths = 0
+        yearsTab.forEach((value, date) => {
+            var temp = Object.assign({}, yearsTab.get(date));
+            temp.averageBalance = temp.balances.reduce((finalResult, balance) => finalResult + balance, 0) / temp.balances.length
+            yearsTab.set(date, temp)
+            totalAverageBalance += temp.balances.reduce((finalResult, balance) => finalResult + balance, 0)
+            nbMonths += temp.balances.length
+        })
+
+        var final = totalAverageBalance / nbMonths
+        yearsTab.set('total', {displayableDate: 'Total', averageBalance: final, balances: []})
+       
+        
+        console.log("[populateYears] - sortie ", yearsTab)
+        return yearsTab
     }
 
     getColor(ctx){
@@ -113,45 +153,68 @@ class LineChart extends React.Component {
                 }
         ]  
         }
+        var yearsTab = this.populateYears(data)
         return (
-            <div className="flex justify-around border p-2 items-center shadow-md sm:rounded-lg line-container">
-                <Line
-                    data={chartData}
-                    options={
-                    {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                display: true,
-                                labels: {
-                                    font: {
-                                        weight: 'lighter',
-                                        family: "news",
-                                        size: 16
+            <div className="flex justify-stretch border shadow-md sm:rounded-lg p-2">
+                <div className="basis-10/12">
+                    <Line
+                        data={chartData}
+                        options={
+                        {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    labels: {
+                                        font: {
+                                            weight: 'lighter',
+                                            family: "news",
+                                            size: 16
+                                        }
                                     }
                                 }
-                            }
-                        },
-                        layout: {
-                            padding: 0
-                        },
-                        scales: {
-                            x: {
-                              grid: {
-                                display: false,
-                              }
                             },
-                            y: {
+                            layout: {
+                                padding: 0
+                            },
+                            scales: {
+                                x: {
                                 grid: {
-                                    color: this.getColor,
-                                    lineWidth: this.getLine,
-                                    z: 2
+                                    display: false,
+                                }
+                                },
+                                y: {
+                                    grid: {
+                                        color: this.getColor,
+                                        lineWidth: this.getLine,
+                                        z: 2
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                />
+                    />
+                </div> 
+                <div className="basis-2/12">
+                    <table className="w-full text-xs text-left rtl:text-right text-gray-500 dark:text-gray-400 border">
+                        <thead className="text-xs text-gray-700 bg-red-200 dark:bg-gray-700 dark:text-gray-400">
+                            <tr>
+                                <th scope="col" className="px-2 py-3 w-1.5">Year</th>
+                                <th scope="col" className="px-2 py-3 w-3.5">Balance average</th>
+                            </tr>
+                        </thead>
+                        <tbody className="shadow-md h-full">
+                            {Array.from(yearsTab.values()).map((value, index) => {
+                                return (
+                                    <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                        <td className="px-2 w-1.5">{value.displayableDate}</td>
+                                        <td className="px-2 w-3.5">{value.averageBalance.toFixed(2) + '$'}</td>
+                                    </tr>
+                                )
+                            })}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         )
     }

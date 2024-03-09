@@ -6,6 +6,7 @@ import PaymentsTab from "./PaymentsTab/PaymentsTab";
 import FilterPanel from "./FilterPanel/FilterPanel";
 import moment from "moment";
 import LineChart from "./LineChart/LineChart";
+import NavBarCustom from './NavBarCustom/NavBarCustom'
 
 class Home extends React.Component{
   constructor(){
@@ -140,11 +141,12 @@ class Home extends React.Component{
   render(){
     return (
       <div className="p-6 pt-1 test">
-        <h1 className="text-3xl font-bold mb-2 text-center">Finance Master</h1>
-        <AdminPanel onDataChange={this.onload} onSaveFile={this.onSaveFile}></AdminPanel>
+        <h1 className="text-3xl text-red-400 font-bold mb-2 text-center">Finance Master</h1>
+        <NavBarCustom></NavBarCustom>
         <FilterPanel categories={this.state.categoriesList} descriptions={this.state.descriptionsList} onSearch={this.onSearch}></FilterPanel>
         <PaymentsTab payments={this.state.currentPaymentList} deleteCategory={this.deleteCategory} categories={this.state.categoriesList} addCategory={this.addCategory}></PaymentsTab>
         <LineChart payments={this.state.currentPaymentList}></LineChart>
+        <AdminPanel onDataChange={this.onload} onSaveFile={this.onSaveFile}></AdminPanel>
       </div>
     );
   }

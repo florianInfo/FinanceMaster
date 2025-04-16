@@ -17,7 +17,7 @@ export default function RootLayout({
           attribute="data-theme"
           defaultTheme="dark-red"
           enableSystem={false}
-          themes={['dark-red', 'light-red']}
+          themes={['dark-red', 'light-red', 'dark-green', 'light-green']}
         >
           <div className="flex h-screen overflow-hidden">
             {/* Sidebar rétractable */}

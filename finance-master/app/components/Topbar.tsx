@@ -12,7 +12,9 @@ const LANGUAGES = [
 
 const THEMES = [
   { name: 'dark-red', color: 'bg-black border-red-500' },
-  { name: 'light-red', color: 'bg-white border-red-500' }
+  { name: 'light-red', color: 'bg-white border-red-500' },
+  { name: 'dark-green', color: 'bg-black border-green-500' },
+  { name: 'light-green', color: 'bg-white border-green-500' }
 ];
 
 export default function Topbar() {

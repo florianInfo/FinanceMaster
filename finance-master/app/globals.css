@@ -48,6 +48,32 @@
   --text-font-regular: "Zain-Regular", Arial, sans-serif;
 }
 
+[data-theme="light-green"] {
+  --color-bg: #f8fff8;
+  --color-surface: #ebfbee;
+  --color-text: #0f2010;
+  --color-text-hover: #ffffff;
+  --color-primary: #0c9b57;           /* vert Desjardins principal */
+  --color-secondary: #057a45;        /* vert secondaire plus foncé */
+  --color-muted: #7a8f7d;
+  --color-border: #b4d3be;
+  --text-font-light: "Zain-Light", Arial, sans-serif;
+  --text-font-regular: "Zain-Regular", Arial, sans-serif;
+}
+
+[data-theme="dark-green"] {
+  --color-bg: #0f1f13;
+  --color-surface: #162d1d;
+  --color-text: #e6f2e8;
+  --color-text-hover: #ffffff;
+  --color-primary: #0c9b57;
+  --color-secondary: #057a45;
+  --color-muted: #9ca3af;
+  --color-border: #274533;
+  --text-font-light: "Zain-Light", Arial, sans-serif;
+  --text-font-regular: "Zain-Regular", Arial, sans-serif;
+}
+
 body {
   background: var(--color-bg);
   color: var(--color-text);

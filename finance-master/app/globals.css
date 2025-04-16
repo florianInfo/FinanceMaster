@@ -22,10 +22,11 @@
   --color-border: #e5e7eb;
 }
 
-[data-theme="theme-bnc-light"] {
+[data-theme="light-red"] {
   --color-bg: #fffffa;
   --color-surface: #f8f9fa;
   --color-text: #111111;
+  --color-text-hover: #ffffff;
   --color-primary: #e41c23;
   --color-secondary: #b40e02;
   --color-muted: #9ca3af;
@@ -34,49 +35,24 @@
   --text-font-regular: "Zain-Regular", Arial, sans-serif;
 }
 
-[data-theme="theme-bnc-dark"] {
+[data-theme="dark-red"] {
   --color-bg: #0f0f11;
   --color-surface: #1a1a1c;
   --color-text: #ffffff;
+  --color-text-hover: #ffffff;
   --color-primary: #e41c23;
   --color-secondary: #b40e02;
   --color-muted: #9ca3af;
   --color-border: #2f2f2f;
   --text-font-light: "Zain-Light", Arial, sans-serif;
   --text-font-regular: "Zain-Regular", Arial, sans-serif;
-}
-
-[data-theme="theme-desjardins"] {
-  --color-bg: #0f0f11;
-  --color-surface: #1a1a1c;
-  --color-text: #ffffff;
-  --color-primary: #16a34a;
-  --color-secondary: #10b981;
-  --color-muted: #9ca3af;
-  --color-border: #2f2f2f;
-  --text-font-light: "Gilroy-Medium", Arial, sans-serif;
-}
-
-[data-theme="theme-scotia"] {
-  --color-bg: #0f0f11;
-  --color-surface: #1a1a1c;
-  --color-text: #ffffff;
-  --color-primary: #2563eb;
-  --color-secondary: #3b82f6;
-  --color-muted: #9ca3af;
-  --color-border: #2f2f2f;
-  --text-font-light: "Gilroy-Medium", Arial, sans-serif;
 }
 
 body {
   background: var(--color-bg);
   color: var(--color-text);
-  border-color: var(--color-primary);
-  font-family: var(--text-font-light);
-}
-
-*{
-  border-color: var(--color-primary);
+  border-color: var(--color-border);
+  font-family: var(--text-font-regular);
 }
 
 h1 {

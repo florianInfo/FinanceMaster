@@ -1,12 +1,11 @@
 'use client';
 
-import { Globe, PaintBucket, Download, Import } from 'lucide-react';
+import { Globe, PaintBucket, Download, HardDriveUpload } from 'lucide-react';
 import { useState, useRef } from 'react';
-import { useTheme } from 'next-themes'
-import Image from 'next/image';
+import { useTheme } from 'next-themes';
 import { parseCsvToTransactions } from '../libs/FileUploader';
 import { useTransactions } from '../contexts/TransactionsContext';
-
+import CurrencySelector from '../components/CurrencySelector';
 
 const LANGUAGES = [
   { code: 'fr', label: 'FR', flag: '/flags/fr.svg' },
@@ -17,12 +16,12 @@ const THEMES = [
   { name: 'dark-red', color: 'bg-black border-red-500' },
   { name: 'light-red', color: 'bg-white border-red-500' },
   { name: 'dark-green', color: 'bg-black border-green-500' },
-  { name: 'light-green', color: 'bg-white border-green-500' }
+  { name: 'light-green', color: 'bg-white border-green-500' },
 ];
 
 export default function Topbar() {
   const [language, setLanguage] = useState('fr');
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme } = useTheme();
   const { addTransactions } = useTransactions();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -53,20 +52,23 @@ export default function Topbar() {
 
   return (
     <div className="flex items-center justify-between border-b px-4 shadow-sm h-12">
-      {/* LANG */}
-      <div className="flex items-center gap-2">
-        <Globe size={20} />
-        <select
-          className="border rounded px-2 py-1 text-sm bg-(--color-bg) cursor-pointer"
-          value={language}
-          onChange={(e) => setLanguage(e.target.value)}
-        >
-          {LANGUAGES.map((lang) => (
-            <option key={lang.code} value={lang.code}>
-              {lang.label}
-            </option>
-          ))}
-        </select>
+      {/* LANG + CURRENCY */}
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <Globe size={20} />
+          <select
+            className="border rounded px-2 py-1 text-sm bg-(--color-bg) cursor-pointer"
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+          >
+            {LANGUAGES.map((lang) => (
+              <option key={lang.code} value={lang.code}>
+                {lang.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <CurrencySelector />
       </div>
 
       {/* THEME */}
@@ -86,7 +88,6 @@ export default function Topbar() {
 
       {/* ACTIONS */}
       <div className="flex items-center gap-4">
-        {/* SAVE JSON */}
         <button
           onClick={handleDownload}
           className="p-1 cursor-pointer hover:text-(--color-secondary) transition"
@@ -95,13 +96,12 @@ export default function Topbar() {
           <Download size={20} />
         </button>
 
-        {/* IMPORT CSV */}
         <button
           onClick={() => fileInputRef.current?.click()}
           className="p-1 cursor-pointer hover:text-(--color-secondary) transition"
           title="Importer un fichier CSV"
         >
-          <Import size={20} />
+          <HardDriveUpload size={20} />
         </button>
 
         <input

@@ -6,8 +6,11 @@ import {
   flexRender,
   ColumnDef,
 } from '@tanstack/react-table';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { useMemo, useState, useEffect } from 'react';
 import { Transaction } from '../types/Transaction';
+import { useCurrency } from '../contexts/CurrencyContext';
+import '../globals.css'
 
 interface Props {
   data: Transaction[];
@@ -16,6 +19,7 @@ interface Props {
 }
 
 export default function TransactionTable({ data, setData, onSelectionChange }: Props) {
+  const {currency} = useCurrency();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [pageSize, setPageSize] = useState(20);
   const [pageIndex, setPageIndex] = useState(0);
@@ -84,9 +88,9 @@ export default function TransactionTable({ data, setData, onSelectionChange }: P
     {
       header: 'Montant',
       accessorKey: 'amount',
-      cell: (info) => `${info.getValue<number>().toFixed(2)} $`,
+      cell: (info) => `${info.getValue<number>().toFixed(2)} ${currency}`,
     },
-  ], [data, selectedIds, setData]);
+  ], [data, selectedIds, setData, currency]);
 
   const table = useReactTable({
     data,
@@ -109,11 +113,11 @@ export default function TransactionTable({ data, setData, onSelectionChange }: P
   return (
     <div className="overflow-auto border rounded">
       <table className="min-w-full text-sm">
-        <thead className="bg-gray-100">
+        <thead className="bg-(--color-primary)">
           {table.getHeaderGroups().map(headerGroup => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map(header => (
-                <th key={header.id} className="text-left p-2 font-medium">
+                <th key={header.id} className="text-left text-white p-2 font-medium">
                   {flexRender(header.column.columnDef.header, header.getContext())}
                 </th>
               ))}
@@ -131,12 +135,12 @@ export default function TransactionTable({ data, setData, onSelectionChange }: P
             </tr>
           ))}
         </tbody>
-        <tfoot className="bg-gray-100 border-t">
+        <tfoot className="bg-(--color-primary) border-t">
           <tr>
-            <td className="p-2 font-semibold" colSpan={columns.length}>
+            <td className="p-2 font-semibold text-white" colSpan={columns.length}>
               Total : {data.length} transactions —
-              Débits : {totalDebit.toFixed(2)} $ —
-              Crédits : {totalCredit.toFixed(2)} $
+              Débits : {totalDebit.toFixed(2)} {currency} —
+              Crédits : {totalCredit.toFixed(2)} {currency}
             </td>
           </tr>
           <tr>
@@ -146,15 +150,15 @@ export default function TransactionTable({ data, setData, onSelectionChange }: P
                   <button
                     onClick={() => setPageIndex((prev) => Math.max(prev - 1, 0))}
                     disabled={pageIndex === 0}
-                    className="px-2 py-1 bg-gray-200 rounded disabled:opacity-50"
+                    className="px-2 py-1 bg-transparent text-white rounded disabled:opacity-50"
                   >
-                    ‹
+                    <ChevronLeft/>
                   </button>
                   {pageRange.map((num) => (
                     <button
                       key={num}
                       onClick={() => setPageIndex(num)}
-                      className={`px-2 py-1 rounded ${pageIndex === num ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                      className={`px-2 cursor-pointer text-black py-1 rounded ${pageIndex === num ? 'bg-(--color-secondary) text-white' : 'bg-white'}`}
                     >
                       {num + 1}
                     </button>
@@ -162,12 +166,12 @@ export default function TransactionTable({ data, setData, onSelectionChange }: P
                   <button
                     onClick={() => setPageIndex((prev) => Math.min(prev + 1, totalPages - 1))}
                     disabled={pageIndex >= totalPages - 1}
-                    className="px-2 py-1 bg-gray-200 rounded disabled:opacity-50"
+                    className="px-2 py-1 cursor-pointer bg-transparent text-white rounded disabled:opacity-50"
                   >
-                    ›
+                    <ChevronRight/>
                   </button>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 text-white">
                   <span className="text-sm">Lignes/page :</span>
                   <input
                     type="number"

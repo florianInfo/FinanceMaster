@@ -5,6 +5,7 @@ import { ThemeProvider } from 'next-themes';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
 import { TransactionsProvider } from './contexts/TransactionsContext';
+import { CurrencyProvider } from './contexts/CurrencyContext';
 
 export default function RootLayout({
   children,
@@ -21,19 +22,21 @@ export default function RootLayout({
           themes={['dark-red', 'light-red', 'dark-green', 'light-green']}
         >
           <TransactionsProvider>
-            <div className="flex h-screen overflow-hidden">
-              {/* Sidebar rétractable */}
-              <Sidebar />
+            <CurrencyProvider>
+              <div className="flex h-screen overflow-hidden">
+                {/* Sidebar rétractable */}
+                <Sidebar />
 
-              {/* Contenu principal */}
-              <div className="flex flex-col flex-1">
-                {/* Topbar avec langue / thème / export-import */}
-                <Topbar />
+                {/* Contenu principal */}
+                <div className="flex flex-col flex-1">
+                  {/* Topbar avec langue / thème / export-import */}
+                  <Topbar />
 
-                {/* Page content */}
-                <main className="p-4 overflow-auto flex-1">{children}</main>
+                  {/* Page content */}
+                  <main className="p-4 overflow-auto flex-1">{children}</main>
+                </div>
               </div>
-            </div>
+            </CurrencyProvider>
           </TransactionsProvider>
         </ThemeProvider>
       </body>

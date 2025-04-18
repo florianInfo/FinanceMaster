@@ -4,6 +4,9 @@ import { Globe, PaintBucket, Download, Import } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { useTheme } from 'next-themes'
 import Image from 'next/image';
+import { parseCsvToTransactions } from '../libs/FileUploader';
+import { useTransactions } from '../contexts/TransactionsContext';
+
 
 const LANGUAGES = [
   { code: 'fr', label: 'FR', flag: '/flags/fr.svg' },
@@ -20,6 +23,7 @@ const THEMES = [
 export default function Topbar() {
   const [language, setLanguage] = useState('fr');
   const { theme, setTheme } = useTheme()
+  const { addTransactions } = useTransactions();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDownload = () => {
@@ -40,7 +44,8 @@ export default function Topbar() {
       const reader = new FileReader();
       reader.onload = (event) => {
         const csvContent = event.target?.result as string;
-        console.log('CSV content:', csvContent); // À parser selon ton modèle
+        const parsed = parseCsvToTransactions(csvContent);
+        addTransactions(parsed);
       };
       reader.readAsText(file);
     }

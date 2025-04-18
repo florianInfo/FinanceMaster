@@ -47,7 +47,9 @@ export default function Topbar() {
         const content = event.target?.result as string;
 
         if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
-          const parsed = parseCsvToTransactions(content);
+          const lastId = Math.max(0, ...transactions.map(t => parseInt(t.id)).filter(Number.isFinite))
+          console.log(lastId)
+          const parsed = parseCsvToTransactions(content, lastId);
           addTransactions(parsed);
         } else if (file.type === 'application/json' || file.name.endsWith('.json')) {
           try {

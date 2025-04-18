@@ -6,7 +6,7 @@ function sanitizeFloat(value: any): number {
   return isNaN(num) ? 0 : num;
 }
 
-export function parseCsvToTransactions(csvContent: string): Transaction[] {
+export function parseCsvToTransactions(csvContent: string, lastId: number): Transaction[] {
   const result = Papa.parse(csvContent, {
     header: true,
     skipEmptyLines: true,
@@ -24,11 +24,11 @@ export function parseCsvToTransactions(csvContent: string): Transaction[] {
     const rawCategory = row['Categorie'] || row['Catégorie'] || 'Autre';
 
     return {
-      id: `${index}-${rawDate}-${rawDesc}`,
+      id: `${lastId + index + 1}`, // <- ID auto-incrémenté
       date: new Date(rawDate).toISOString(),
       description: rawDesc.trim(),
       categories: rawCategory.split(',').map((c: string) => c.trim()).filter(Boolean),
-      amount, // ou détecter via autre colonne
+      amount,
       type,
     };
   });

@@ -22,11 +22,11 @@ const THEMES = [
 export default function Topbar() {
   const [language, setLanguage] = useState('fr');
   const { theme, setTheme } = useTheme();
-  const { addTransactions } = useTransactions();
+  const { transactions, addTransactions } = useTransactions();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDownload = () => {
-    const data = { transactions: [] }; // <-- à remplacer par les vraies données
+    const data = { transactions: transactions }; // <-- à remplacer par les vraies données
     const blob = new Blob([JSON.stringify(data, null, 2)], {
       type: 'application/json',
     });
@@ -38,16 +38,32 @@ export default function Topbar() {
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && file.type === 'text/csv') {
+    const files = e.target.files;
+    if (!files) return;
+
+    Array.from(files).forEach((file) => {
       const reader = new FileReader();
       reader.onload = (event) => {
-        const csvContent = event.target?.result as string;
-        const parsed = parseCsvToTransactions(csvContent);
-        addTransactions(parsed);
+        const content = event.target?.result as string;
+
+        if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+          const parsed = parseCsvToTransactions(content);
+          addTransactions(parsed);
+        } else if (file.type === 'application/json' || file.name.endsWith('.json')) {
+          try {
+            const parsed = JSON.parse(content);
+            if (Array.isArray(parsed)) {
+              addTransactions(parsed);
+            } else if (Array.isArray(parsed.transactions)) {
+              addTransactions(parsed.transactions);
+            }
+          } catch (err) {
+            console.error('Invalid JSON file:', err);
+          }
+        }
       };
       reader.readAsText(file);
-    }
+    });
   };
 
   return (
@@ -99,14 +115,15 @@ export default function Topbar() {
         <button
           onClick={() => fileInputRef.current?.click()}
           className="p-1 cursor-pointer hover:text-(--color-secondary) transition"
-          title="Importer un fichier CSV"
+          title="Importer un ou plusieurs fichiers CSV ou JSON"
         >
           <HardDriveUpload size={20} />
         </button>
 
         <input
           type="file"
-          accept=".csv"
+          accept=".csv,.json"
+          multiple
           ref={fileInputRef}
           className="hidden"
           onChange={handleFileUpload}

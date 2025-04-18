@@ -6,6 +6,5 @@ export interface Transaction {
   description: string;
   categories: string[]; // ex: ['Courses', 'Alimentation']
   amount: number;
-  currency: string; // ex: EUR, USD
   type: TransactionType;
 }

@@ -28,8 +28,7 @@ export function parseCsvToTransactions(csvContent: string): Transaction[] {
       date: new Date(rawDate).toISOString(),
       description: rawDesc.trim(),
       categories: rawCategory.split(',').map((c: string) => c.trim()).filter(Boolean),
-      amount,
-      currency: '$', // ou détecter via autre colonne
+      amount, // ou détecter via autre colonne
       type,
     };
   });

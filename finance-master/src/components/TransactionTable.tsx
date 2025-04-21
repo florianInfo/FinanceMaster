@@ -8,9 +8,9 @@ import {
 } from '@tanstack/react-table';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { useMemo, useState, useEffect } from 'react';
-import { Transaction } from '../types/Transaction';
-import { useCurrency } from '../contexts/CurrencyContext';
-import '../globals.css'
+import { Transaction } from '@/types/Transaction';
+import { useCurrency } from '@/contexts/CurrencyContext';
+import '@/styles/globals.css'
 
 interface Props {
   data: Transaction[];

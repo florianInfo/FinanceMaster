@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import logo from '@/public/logo-bnc.jpg';
+import logo from '../../public/logo-bnc.jpg';
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);

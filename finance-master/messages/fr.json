@@ -1,0 +1,14 @@
+{
+  "common": {
+    "appTitle": "FinanceMaster",
+    "nav": {
+      "dashboard": "Accueil",
+      "settings": "Paramètres"
+    }
+  },
+  "Dashboard": {
+    "title": "Bienvenue à l'Accueil",
+    "description": "Voici une vue d'ensemble de vos finances",
+    "loginButton": "Connectez vous"
+  }
+}

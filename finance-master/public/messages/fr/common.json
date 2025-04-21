@@ -1,0 +1,17 @@
+{
+  "appTitle": "FinanceMaster",
+  "sideBar": {
+    "dashboard": "Dashboard",
+    "transactions": "Transactions",
+    "statistics": "Statistics",
+    "investments": "Investments",
+    "forecasts":   "Prévisions",
+    "budget": "Budget",
+    "settings": "Settings"
+  },
+  "topBar": {
+    "importFile" : "Import one or more CSV or JSON files",
+    "exportFile": "Export to JSON",
+    "currency": "Currency"
+  }
+}

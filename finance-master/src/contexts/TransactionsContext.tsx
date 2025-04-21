@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { Transaction } from '../types/Transaction';
+import { Transaction } from '@/types/Transaction';
 
 interface TransactionsContextType {
   transactions: Transaction[];

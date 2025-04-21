@@ -1,8 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react';
-import { useTransactions } from '../contexts/TransactionsContext';
-import TransactionTable from '../components/TransactionTable';
-import { Transaction } from '../types/Transaction';
+import { useTransactions} from '@/contexts/TransactionsContext'
+import TransactionTable from '@/components/TransactionTable';
+import { Transaction } from '@/types/Transaction';
 
 export default function TransactionsPage() {
   const { transactions } = useTransactions();

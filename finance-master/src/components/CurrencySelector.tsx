@@ -1,4 +1,5 @@
-import { useCurrency, SUPPORTED_CURRENCIES } from "../contexts/CurrencyContext";
+'use client';
+import { useCurrency, SUPPORTED_CURRENCIES } from "@/contexts/CurrencyContext";
 
 export default function CurrencySelector() {
   const { currency, setCurrency } = useCurrency();

@@ -3,14 +3,10 @@
 import { Globe, PaintBucket, Download, HardDriveUpload } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { useTheme } from 'next-themes';
-import { parseCsvToTransactions } from '../libs/FileUploader';
-import { useTransactions } from '../contexts/TransactionsContext';
-import CurrencySelector from '../components/CurrencySelector';
-
-const LANGUAGES = [
-  { code: 'fr', label: 'FR', flag: '/flags/fr.svg' },
-  { code: 'en', label: 'EN', flag: '/flags/en.svg' },
-];
+import { parseCsvToTransactions } from '@/libs/FileUploader';
+import { useTransactions } from '@/contexts/TransactionsContext';
+import CurrencySelector from './CurrencySelector';
+import LanguageSelector from './LanguageSelector';
 
 const THEMES = [
   { name: 'dark-red', color: 'bg-black border-red-500' },
@@ -48,7 +44,6 @@ export default function Topbar() {
 
         if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
           const lastId = Math.max(0, ...transactions.map(t => parseInt(t.id)).filter(Number.isFinite))
-          console.log(lastId)
           const parsed = parseCsvToTransactions(content, lastId);
           addTransactions(parsed);
         } else if (file.type === 'application/json' || file.name.endsWith('.json')) {
@@ -73,19 +68,9 @@ export default function Topbar() {
       {/* LANG + CURRENCY */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <Globe size={20} />
-          <select
-            className="border rounded px-2 py-1 text-sm bg-(--color-bg) cursor-pointer"
-            value={language}
-            onChange={(e) => setLanguage(e.target.value)}
-          >
-            {LANGUAGES.map((lang) => (
-              <option key={lang.code} value={lang.code}>
-                {lang.label}
-              </option>
-            ))}
-          </select>
-        </div>
++         <Globe size={20} />
++         <LanguageSelector />
++       </div>
         <CurrencySelector />
       </div>
 

@@ -1,5 +1,5 @@
 import Papa from 'papaparse'
-import { Transaction, TransactionType } from '../types/Transaction';
+import { Transaction, TransactionType } from '@/types/Transaction'
 
 function sanitizeFloat(value: any): number {
   const num = parseFloat(String(value).replace(',', '.'));

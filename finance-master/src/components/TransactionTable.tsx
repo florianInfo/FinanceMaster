@@ -193,7 +193,7 @@ export default function TransactionTable({ data, setData, onSelectionChange }: P
                       onClick={() => setPageIndex(n)}
                       className={`px-2 cursor-pointer text-black py-1 rounded ${
                         pageIndex === n
-                          ? 'bg-[-var(--color-secondary)] text-white'
+                          ? 'bg-(--color-secondary) text-white'
                           : 'bg-white'
                       }`}
                     >

@@ -1,12 +1,13 @@
 'use client';
 import { useCurrency, SUPPORTED_CURRENCIES } from "@/contexts/CurrencyContext";
+import { DollarSign } from "lucide-react";
 
 export default function CurrencySelector() {
   const { currency, setCurrency } = useCurrency();
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm">Devise :</span>
+      <DollarSign/>
       <select
         value={currency}
         onChange={(e) => setCurrency(e.target.value as typeof currency)}

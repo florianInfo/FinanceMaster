@@ -3,17 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { useTransactions } from '@/contexts/TransactionsContext';
 import TransactionTable from '@/components/TransactionTable';
 import { Transaction } from '@/types/Transaction';
-import TransactionFilters, { CategoryOption, TransactionFiltersValues } from '@/components/TransactionsFilter';
-
-const categories: CategoryOption[] = [
-  { value: 'food', label: 'Alimentation' },
-  { value: 'rent', label: 'Loyer' },
-  { value: 'salary', label: 'Salaire' },
-  // …
-];
+import TransactionFilters, {TransactionFiltersValues } from '@/components/TransactionsFilter';
+import { CategoryOption } from '@/types/CategoryOption';
 
 export default function TransactionsPage() {
-  const { transactions } = useTransactions();
+  const { transactions, categories } = useTransactions();
 
   // État des filtres
   const [filters, setFilters] = useState<TransactionFiltersValues>({
@@ -40,7 +34,7 @@ export default function TransactionsPage() {
       }
 
       // Filtre par catégories
-      if (filters.categories.length > 0 && !filters.categories.includes(tx.categories)) {
+      if (filters.categories.length > 0 && !filters.categories.some(cat => tx.categories.includes(cat))) {
         return false;
       }
 
@@ -86,8 +80,8 @@ export default function TransactionsPage() {
   };
 
   return (
-    <main className="p-6">
-      <h1 className="text-xl font-semibold mb-4">Mes Transactions</h1>
+    <main className="p-4 flex flex-col gap-2">
+      <h1 className="text-xl font-semibold mb-2">Mes Transactions</h1>
 
       <TransactionFilters
         categories={categories}

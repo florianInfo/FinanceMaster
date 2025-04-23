@@ -1,10 +1,8 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-
-export interface CategoryOption {
-  value: string;
-  label: string;
-}
+import Select from 'react-select';
+import { X } from 'lucide-react';
+import { CategoryOption } from '@/types/CategoryOption';
 
 export interface TransactionFiltersValues {
   startDate: string;
@@ -34,73 +32,124 @@ const TransactionFilters: React.FC<TransactionFiltersProps> = ({
     minAmount: initialValues.minAmount ?? '',
     maxAmount: initialValues.maxAmount ?? '',
   });
+  const [hasMounted, setHasMounted] = useState(false);
 
-  // Dès qu’un champ change, on notifie le parent
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
   useEffect(() => {
     onFiltersChange(filters);
   }, [filters, onFiltersChange]);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const clearField = (name: keyof TransactionFiltersValues) => {
+    setFilters(prev => ({ ...prev, [name]: '' }));
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFilters((prev) => ({
+    setFilters(prev => ({
       ...prev,
-      [name]: name.includes('Amount') ? (value === '' ? '' : parseFloat(value)) : value,
+      [name]: name.includes('Amount')
+        ? value === ''
+          ? ''
+          : parseFloat(value)
+        : value,
     }));
   };
 
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFilters((prev) => ({ ...prev, [name]: value }));
+  const handleCategorySelect = (
+    selected: { value: string; label: string }[] | null
+  ) => {
+    const values = selected ? selected.map(opt => opt.value) : [];
+    setFilters(prev => ({ ...prev, categories: values }));
   };
 
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selected = Array.from(e.target.selectedOptions).map((o) => o.value);
-    setFilters((prev) => ({ ...prev, categories: selected }));
-  };
+  const selectOptions = categories.map(c => ({ value: c.value, label: c.label, color: c.color }));
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 bg-white rounded-lg shadow">
       {/* Date de début */}
-      <label className="flex flex-col">
+      <label className="flex flex-col relative">
         <span className="mb-1 text-sm font-medium text-gray-700">Date de début</span>
         <input
           type="date"
           name="startDate"
           value={filters.startDate}
-          onChange={handleDateChange}
-          className="px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
+          onChange={handleInputChange}
+          className="px-3 py-2 w-full text-black border rounded focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
         />
+        {filters.startDate && (
+          <button
+            type="button"
+            onClick={() => clearField('startDate')}
+            className="absolute right-8 top-2/3 -translate-y-1/2 p-1 text-gray-500 hover:text-gray-700"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </label>
 
       {/* Date de fin */}
-      <label className="flex flex-col">
+      <label className="flex flex-col relative">
         <span className="mb-1 text-sm font-medium text-gray-700">Date de fin</span>
         <input
           type="date"
           name="endDate"
           value={filters.endDate}
-          onChange={handleDateChange}
-          className="px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
+          onChange={handleInputChange}
+          className="px-3 py-2 w-full text-black border rounded focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
         />
+        {filters.endDate && (
+          <button
+            type="button"
+            onClick={() => clearField('endDate')}
+            className="absolute right-8 top-2/3 -translate-y-1/2 p-1 text-gray-500 hover:text-gray-700"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </label>
 
       {/* Catégories */}
       <label className="flex flex-col">
         <span className="mb-1 text-sm font-medium text-gray-700">Catégories</span>
-        <select
-          multiple
-          value={filters.categories}
-          onChange={handleCategoryChange}
-          className="h-32 px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
-        >
-          {categories.map((cat) => (
-            <option key={cat.value} value={cat.value}>
-              {cat.label}
-            </option>
-          ))}
-        </select>
+        {hasMounted && (
+          <Select
+            options={selectOptions}
+            isMulti
+            placeholder="Sélectionnez..."
+            value={selectOptions.filter(opt =>
+              filters.categories.includes(opt.value)
+            )}
+            onChange={handleCategorySelect}
+            className="react-select-container text-black"
+            classNamePrefix="react-select"
+            closeMenuOnSelect={false}
+            styles={{
+              multiValue: (base, { data }) => ({
+                ...base,
+                backgroundColor: data.color || 'var(--color-primary)',
+                borderRadius: '6px',
+              }),
+              multiValueLabel: (base, { data }) => ({
+                ...base,
+                color: 'white',
+                fontWeight: 500,
+              }),
+              multiValueRemove: (base, { data }) => ({
+                ...base,
+                color: 'white',
+                ':hover': {
+                  backgroundColor: data.color || 'var(--color-primary)',
+                  filter: 'brightness(0.85)',
+                  color: 'white',
+                },
+              }),
+            }}
+            
+          />
+        )}
       </label>
 
       {/* Description */}
@@ -112,34 +161,54 @@ const TransactionFilters: React.FC<TransactionFiltersProps> = ({
           value={filters.description}
           onChange={handleInputChange}
           placeholder="Rechercher…"
-          className="px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
+          className="px-3 py-2 text-black border rounded focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
         />
       </label>
 
-      {/* Montant min */}
-      <label className="flex flex-col">
+      {/* Montant minimum */}
+      <label className="flex flex-col relative">
         <span className="mb-1 text-sm font-medium text-gray-700">Montant minimum</span>
         <input
           type="number"
           name="minAmount"
           value={filters.minAmount}
           onChange={handleInputChange}
+          onWheel={e => e.preventDefault()}
           placeholder="0.00"
-          className="px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
+          className="px-3 py-2 w-full text-black border rounded focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
         />
+        {filters.minAmount !== '' && (
+          <button
+            type="button"
+            onClick={() => clearField('minAmount')}
+            className="absolute right-8 top-2/3 -translate-y-1/2 p-1 text-gray-500 hover:text-gray-700"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </label>
 
-      {/* Montant max */}
-      <label className="flex flex-col">
+      {/* Montant maximum */}
+      <label className="flex flex-col relative">
         <span className="mb-1 text-sm font-medium text-gray-700">Montant maximum</span>
         <input
           type="number"
           name="maxAmount"
           value={filters.maxAmount}
           onChange={handleInputChange}
+          onWheel={e => e.preventDefault()}
           placeholder="0.00"
-          className="px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
+          className="px-3 py-2 w-full text-black border rounded focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
         />
+        {filters.maxAmount !== '' && (
+          <button
+            type="button"
+            onClick={() => clearField('maxAmount')}
+            className="absolute right-8 top-2/3 -translate-y-1/2 p-1 text-gray-500 hover:text-gray-700"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </label>
     </div>
   );

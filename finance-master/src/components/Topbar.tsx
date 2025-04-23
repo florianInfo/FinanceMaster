@@ -89,9 +89,9 @@ export default function Topbar() {
       {/* LANG + CURRENCY */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-+         <Globe size={20} />
-+         <LanguageSelector />
-+       </div>
+          <Globe size={20} />
+          <LanguageSelector />
+        </div>
         <CurrencySelector />
       </div>
 

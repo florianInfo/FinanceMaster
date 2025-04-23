@@ -1,10 +1,13 @@
-  export type TransactionType = 'debit' | 'credit';
+// src/types/Transaction.ts
+import type { CategoryOption } from './CategoryOption';
 
-  export interface Transaction {
-    id: string;
-    date: string; // ISO string
-    description: string;
-    categories: string[]; // ex: ['Courses', 'Alimentation']
-    amount: number;
-    type: TransactionType;
-  }
+export type TransactionType = 'debit' | 'credit';
+
+export interface Transaction {
+  id: string;
+  date: string;            // ISO string
+  description: string;
+  categories: string[];  // <-- on stocke désormais des CategoryOption
+  amount: number;
+  type: TransactionType;
+}

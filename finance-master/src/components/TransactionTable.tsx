@@ -11,6 +11,8 @@ import { useMemo, useState, useEffect } from 'react';
 import { Transaction } from '@/types/Transaction';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import '@/styles/globals.css'
+import Amount from './Amount';
+import ColoredAmount from './ColoredAmount';
 
 interface Props {
   data: Transaction[];
@@ -88,7 +90,7 @@ export default function TransactionTable({ data, setData, onSelectionChange }: P
     {
       header: 'Montant',
       accessorKey: 'amount',
-      cell: (info) => `${info.getValue<number>().toFixed(2)} ${currency}`,
+      cell: (info) => <ColoredAmount amount={info.getValue<number>()}/>,
     },
   ], [data, selectedIds, setData, currency]);
 
@@ -138,9 +140,11 @@ export default function TransactionTable({ data, setData, onSelectionChange }: P
         <tfoot className="bg-(--color-primary) border-t">
           <tr>
             <td className="p-2 font-semibold text-white" colSpan={columns.length}>
-              Total : {data.length} transactions —
-              Débits : {totalDebit.toFixed(2)} {currency} —
-              Crédits : {totalCredit.toFixed(2)} {currency}
+              Total : {data.length} transactions
+              <tr></tr>
+              Débits : <Amount amount={totalDebit}></Amount>
+              <tr></tr>
+              Crédits : <Amount amount={totalCredit}></Amount>
             </td>
           </tr>
           <tr>

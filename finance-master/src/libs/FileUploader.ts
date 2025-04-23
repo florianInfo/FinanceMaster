@@ -15,7 +15,7 @@ export function parseCsvToTransactions(csvContent: string, lastId: number): Tran
   const data: Transaction[] = result.data.map((row: any, index: number): Transaction => {
     const debit = sanitizeFloat(row['Debit']);
     const credit = sanitizeFloat(row['Credit']);
-    const amount = debit > 0 ? debit : credit;
+    const amount = debit > 0 ? -debit : credit;
 
     const type: TransactionType = debit > 0 ? 'debit' : 'credit';
 

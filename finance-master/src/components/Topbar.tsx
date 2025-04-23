@@ -33,35 +33,56 @@ export default function Topbar() {
     a.click();
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
+  
+    let currentTransactions = [...transactions]; // clone en mémoire
+  
+    for (const file of Array.from(files)) {
+      const content = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsText(file);
+      });
+  
+      if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+        const lastId = Math.max(0, ...currentTransactions.map(t => parseInt(t.id)).filter(Number.isFinite));
+        const parsed = parseCsvToTransactions(content, lastId);
+        addTransactions(parsed);
+        currentTransactions = [...currentTransactions, ...parsed]; // update pour les prochains
+      } else if (file.type === 'application/json' || file.name.endsWith('.json')) {
+        try {
+          const parsed = JSON.parse(content);
+          const newTxs = Array.isArray(parsed) ? parsed : parsed.transactions;
+          if (Array.isArray(newTxs)) {
+            const currentIds = new Set(currentTransactions.map(t => t.id));
+            let lastId = Math.max(0, ...currentTransactions.map(t => parseInt(t.id)).filter(Number.isFinite));
 
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const content = event.target?.result as string;
+            const normalized = newTxs.map((t) => {
+              if (!currentIds.has(t.id)) {
+                currentIds.add(t.id);
+                return t;
+              }
+              // Sinon on génère un nouveau id
+              lastId++;
+              return {
+                ...t,
+                id: `${lastId}`,
+              };
+            });
 
-        if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
-          const lastId = Math.max(0, ...transactions.map(t => parseInt(t.id)).filter(Number.isFinite))
-          const parsed = parseCsvToTransactions(content, lastId);
-          addTransactions(parsed);
-        } else if (file.type === 'application/json' || file.name.endsWith('.json')) {
-          try {
-            const parsed = JSON.parse(content);
-            if (Array.isArray(parsed)) {
-              addTransactions(parsed);
-            } else if (Array.isArray(parsed.transactions)) {
-              addTransactions(parsed.transactions);
-            }
-          } catch (err) {
-            console.error('Invalid JSON file:', err);
+            addTransactions(normalized);
+            currentTransactions = [...currentTransactions, ...normalized];
           }
+        } catch (err) {
+          console.error('Invalid JSON file:', err);
         }
-      };
-      reader.readAsText(file);
-    });
+      }
+    }
   };
+  
 
   return (
     <div className="flex items-center justify-between border-b px-4 shadow-sm h-12">

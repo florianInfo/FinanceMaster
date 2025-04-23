@@ -1,27 +1,100 @@
-'use client'
-import { useEffect, useState } from 'react';
-import { useTransactions} from '@/contexts/TransactionsContext'
+"use client"
+import React, { useEffect, useState } from 'react';
+import { useTransactions } from '@/contexts/TransactionsContext';
 import TransactionTable from '@/components/TransactionTable';
 import { Transaction } from '@/types/Transaction';
+import TransactionFilters, { CategoryOption, TransactionFiltersValues } from '@/components/TransactionsFilter';
+
+const categories: CategoryOption[] = [
+  { value: 'food', label: 'Alimentation' },
+  { value: 'rent', label: 'Loyer' },
+  { value: 'salary', label: 'Salaire' },
+  // …
+];
 
 export default function TransactionsPage() {
   const { transactions } = useTransactions();
+
+  // État des filtres
+  const [filters, setFilters] = useState<TransactionFiltersValues>({
+    startDate: '',
+    endDate: '',
+    categories: [],
+    description: '',
+    minAmount: '',
+    maxAmount: '',
+  });
+
+  // Données filtrées pour la table
   const [tableData, setTableData] = useState<Transaction[]>([]);
 
+  // Applique le filtrage à chaque mise à jour des transactions ou des filtres
   useEffect(() => {
-    setTableData([...transactions]);
-  }, [transactions]);
+    const filtered = transactions.filter((tx) => {
+      // Filtre par date
+      if (filters.startDate && new Date(tx.date) < new Date(filters.startDate)) {
+        return false;
+      }
+      if (filters.endDate && new Date(tx.date) > new Date(filters.endDate)) {
+        return false;
+      }
 
+      // Filtre par catégories
+      if (filters.categories.length > 0 && !filters.categories.includes(tx.categories)) {
+        return false;
+      }
+
+      // Filtre par description (recherche insensible à la casse)
+      if (
+        filters.description &&
+        !tx.description.toLowerCase().includes(filters.description.toLowerCase())
+      ) {
+        return false;
+      }
+
+      // Filtre par montant minimum
+      if (
+        filters.minAmount !== '' &&
+        tx.amount < (filters.minAmount as number)
+      ) {
+        return false;
+      }
+
+      // Filtre par montant maximum
+      if (
+        filters.maxAmount !== '' &&
+        tx.amount > (filters.maxAmount as number)
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+    console.log(filtered)
+    setTableData(filtered);
+  }, [transactions, filters]);
+
+  // Mise à jour des filtres
+  const handleFiltersChange = (newFilters: TransactionFiltersValues) => {
+    setFilters(newFilters);
+  };
+
+  // Gestion de la sélection des lignes
   const handleSelectionChange = (selectedIds: string[]) => {
     console.log('Lignes sélectionnées :', selectedIds);
-    // TODO: actions groupées (suppression, export, etc)
+    // TODO: actions groupées (suppression, export, etc.)
   };
 
   return (
     <main className="p-6">
       <h1 className="text-xl font-semibold mb-4">Mes Transactions</h1>
 
-      {/* Zone de filtres à venir ici */}
+      <TransactionFilters
+        categories={categories}
+        initialValues={filters}
+        onFiltersChange={handleFiltersChange}
+      />
+
       <TransactionTable
         data={tableData}
         setData={setTableData}

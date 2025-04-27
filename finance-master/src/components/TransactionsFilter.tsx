@@ -127,6 +127,13 @@ const TransactionFilters: React.FC<TransactionFiltersProps> = ({
             classNamePrefix="react-select"
             closeMenuOnSelect={false}
             styles={{
+              control: (base, state) => ({
+                ...base,
+                padding: '2px',
+                borderColor: state.isFocused ? 'var(--color-primary)' : 'black',
+                boxShadow: state.isFocused ? '0 0 0 1px var(--color-primary)' : 'none',
+                '&:hover': { borderColor: 'var(--color-primary)' },
+              }),
               multiValue: (base, { data }) => ({
                 ...base,
                 backgroundColor: data.color || 'var(--color-primary)',

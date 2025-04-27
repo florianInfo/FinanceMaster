@@ -5,11 +5,12 @@ import {
   useReactTable,
   getCoreRowModel,
   getPaginationRowModel,
+  getSortedRowModel,
   flexRender,
   ColumnDef,
+  SortingState,
 } from '@tanstack/react-table'
-import { ChevronRight, ChevronLeft } from 'lucide-react'
-import { useCurrency } from '@/contexts/CurrencyContext'
+import { ChevronRight, ChevronLeft, Trash2 } from 'lucide-react'
 import { useTransactions } from '@/contexts/TransactionsContext'
 import type { Transaction } from '@/types/Transaction'
 import type { CategoryOption } from '@/types/CategoryOption'
@@ -22,14 +23,15 @@ interface Props {
   data: Transaction[]
   setData: (newData: Transaction[]) => void
   onSelectionChange?: (selectedIds: string[]) => void
+  onDeleteSelected?: (ids: string[]) => void
 }
 
-export default function TransactionTable({ data, setData, onSelectionChange }: Props) {
-  const { currency } = useCurrency()
+export default function TransactionTable({ data, setData, onSelectionChange, onDeleteSelected }: Props) {
   const { categories: allCategories } = useTransactions()
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [pageSize, setPageSize] = useState(20)
   const [pageIndex, setPageIndex] = useState(0)
+  const [sorting, setSorting] = useState<SortingState>([])
 
   useEffect(() => {
     onSelectionChange?.(Array.from(selectedIds))
@@ -43,24 +45,25 @@ export default function TransactionTable({ data, setData, onSelectionChange }: P
     })
   }
 
-  // supprime une catégorie d'une transaction et met à jour le state
-  const handleRemoveCategory = (txId: string, catValue: string) => {
-    /*setData(prev =>
-      prev.map(tx =>
-        tx.id === txId
-          ? {
-              ...tx,
-              categories: tx.categories.filter(v => v !== catValue),
-            }
-          : tx,
-      ),
-    )*/
+  const toggleAllRows = () => {
+    if (selectedIds.size === data.length) {
+      setSelectedIds(new Set()) // Déselectionner tout
+    } else {
+      setSelectedIds(new Set(data.map(tx => tx.id))) // Sélectionner tout
+    }
   }
 
   const columns = useMemo<ColumnDef<Transaction>[]>(() => [
     {
       id: 'select',
-      header: () => <input type="checkbox" disabled />,
+      header: () => (
+        <input
+          type="checkbox"
+          checked={selectedIds.size === data.length && data.length > 0}
+          indeterminate={selectedIds.size > 0 && selectedIds.size < data.length ? "true" : undefined}
+          onChange={toggleAllRows}
+        />
+      ),
       cell: info => (
         <input
           type="checkbox"
@@ -94,21 +97,20 @@ export default function TransactionTable({ data, setData, onSelectionChange }: P
     {
       id: 'categories',
       header: 'Catégories',
-      accessorFn: row => row.categories, // on garde les valeurs string[]
+      accessorFn: row => row.categories,
       cell: info => {
         const tx = info.row.original
-        // récupère les CategoryOption correspondantes
         const opts: CategoryOption[] = tx.categories
           .map(txCat => allCategories.find(catOpt => catOpt.value === txCat))
           .filter((c): c is CategoryOption => !!c)
 
         return (
-          <div className="flex flex-wrap">
+          <div className="flex flex-wrap max-w-xl">
             {opts.map(cat => (
               <CategoryTag
                 key={cat.value}
                 category={cat}
-                onRemove={() => handleRemoveCategory(tx.id, cat.value)}
+                onRemove={() => {/* rien ici pour l’instant */}}
               />
             ))}
           </div>
@@ -120,6 +122,30 @@ export default function TransactionTable({ data, setData, onSelectionChange }: P
       accessorKey: 'amount',
       cell: info => <ColoredAmount amount={info.getValue<number>()} />,
     },
+    {
+      id: 'actions',
+      header: () => (
+        <div className="flex justify-end">
+          <button
+            disabled={selectedIds.size === 0}
+            onClick={() => onDeleteSelected?.(Array.from(selectedIds))}
+            className="cursor-pointer text-white hover:text-(--color-secondary) disabled:text-gray-300"
+          >
+            <Trash2 size={20} />
+          </button>
+        </div>
+      ),
+      cell: info => (
+        <div className="flex justify-end">
+          <button
+            onClick={() => onDeleteSelected?.([info.row.original.id])}
+            className="cursor-pointer text-(--color-primary) hover:text-(--color-secondary)"
+          >
+            <Trash2 size={20} />
+          </button>
+        </div>
+      ),
+    },
   ], [data, selectedIds, allCategories])
 
   const table = useReactTable({
@@ -127,7 +153,9 @@ export default function TransactionTable({ data, setData, onSelectionChange }: P
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    state: { pagination: { pageIndex, pageSize } },
+    getSortedRowModel: getSortedRowModel(),
+    onSortingChange: setSorting,
+    state: { pagination: { pageIndex, pageSize }, sorting },
   })
 
   const totalPages = table.getPageCount()
@@ -146,8 +174,16 @@ export default function TransactionTable({ data, setData, onSelectionChange }: P
           {table.getHeaderGroups().map(hg => (
             <tr key={hg.id}>
               {hg.headers.map(header => (
-                <th key={header.id} className="text-left text-white p-2 font-medium">
+                <th
+                  key={header.id}
+                  className={`text-left p-2 font-medium text-white ${
+                    header.column.id === 'actions' ? 'text-right' : ''
+                  }`}
+                  onClick={header.column.getToggleSortingHandler()}
+                >
                   {flexRender(header.column.columnDef.header, header.getContext())}
+                  {header.column.getIsSorted() === 'asc' && ' ▲'}
+                  {header.column.getIsSorted() === 'desc' && ' ▼'}
                 </th>
               ))}
             </tr>
@@ -157,7 +193,12 @@ export default function TransactionTable({ data, setData, onSelectionChange }: P
           {table.getRowModel().rows.map(row => (
             <tr key={row.id} className="border-t">
               {row.getVisibleCells().map(cell => (
-                <td key={cell.id} className="p-2">
+                <td
+                  key={cell.id}
+                  className={`p-2 ${
+                    cell.column.id === 'categories' ? 'max-w-[200px]' : 'max-w-sm'
+                  } ${cell.column.id === 'actions' ? 'text-right' : ''}`}
+                >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
@@ -192,9 +233,7 @@ export default function TransactionTable({ data, setData, onSelectionChange }: P
                       key={n}
                       onClick={() => setPageIndex(n)}
                       className={`px-2 cursor-pointer text-black py-1 rounded ${
-                        pageIndex === n
-                          ? 'bg-(--color-secondary) text-white'
-                          : 'bg-white'
+                        pageIndex === n ? 'bg-(--color-secondary) text-white' : 'bg-white'
                       }`}
                     >
                       {n + 1}
@@ -205,7 +244,7 @@ export default function TransactionTable({ data, setData, onSelectionChange }: P
                     disabled={pageIndex >= totalPages - 1}
                     className="px-2 py-1 bg-transparent text-white rounded disabled:opacity-50"
                   >
-                    <ChevronRight/>
+                    <ChevronRight />
                   </button>
                 </div>
                 <div className="flex items-center gap-2 text-white">

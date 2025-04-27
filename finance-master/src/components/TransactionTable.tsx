@@ -10,7 +10,7 @@ import {
   ColumnDef,
   SortingState,
 } from '@tanstack/react-table'
-import { ChevronRight, ChevronLeft, Trash2 } from 'lucide-react'
+import { ChevronRight, ChevronLeft, ChevronFirst, ChevronLast, Trash2 } from 'lucide-react'
 import { useTransactions } from '@/contexts/TransactionsContext'
 import type { Transaction } from '@/types/Transaction'
 import type { CategoryOption } from '@/types/CategoryOption'
@@ -129,7 +129,7 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
           <button
             disabled={selectedIds.size === 0}
             onClick={() => onDeleteSelected?.(Array.from(selectedIds))}
-            className="cursor-pointer text-white hover:text-(--color-secondary) disabled:text-gray-300"
+            className="cursor-pointer disabled:cursor-not-allowed text-white hover:text-(--color-secondary) disabled:text-gray-300"
           >
             <Trash2 size={20} />
           </button>
@@ -139,7 +139,7 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
         <div className="flex justify-end">
           <button
             onClick={() => onDeleteSelected?.([info.row.original.id])}
-            className="cursor-pointer text-(--color-primary) hover:text-(--color-secondary)"
+            className="cursor-pointer text-(--color-text) hover:text-(--color-secondary)"
           >
             <Trash2 size={20} />
           </button>
@@ -176,7 +176,7 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
               {hg.headers.map(header => (
                 <th
                   key={header.id}
-                  className={`text-left p-2 font-medium text-white ${
+                  className={`cursor-pointer text-left p-2 font-medium text-white ${
                     header.column.id === 'actions' ? 'text-right' : ''
                   }`}
                   onClick={header.column.getToggleSortingHandler()}
@@ -211,8 +211,8 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
               <div className="flex justify-between">
                 <div>Total : {data.length} transactions</div>
                 <div className="flex flex-col">
-                  <div>Débits : <Amount amount={totalDebit} /></div>
-                  <div>Crédits : <Amount amount={totalCredit} /></div>
+                  <div className='flex justify-between gap-4'> <span>Débits :</span> <Amount amount={totalDebit} /></div>
+                  <div className='flex justify-between gap-4'> <span>Crédits :</span> <Amount className='self-end' amount={totalCredit} /></div>
                 </div>
               </div>
             </td>
@@ -222,9 +222,16 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
               <div className="flex justify-between items-center">
                 <div className="flex gap-2">
                   <button
+                    onClick={() => setPageIndex(0)}
+                    disabled={pageIndex === 0}
+                    className="py-1 cursor-pointer bg-transparent text-white rounded disabled:opacity-50"
+                  >
+                    <ChevronFirst />
+                  </button>
+                  <button
                     onClick={() => setPageIndex(i => Math.max(i - 1, 0))}
                     disabled={pageIndex === 0}
-                    className="px-2 py-1 bg-transparent text-white rounded disabled:opacity-50"
+                    className="py-1 cursor-pointer bg-transparent text-white rounded disabled:opacity-50"
                   >
                     <ChevronLeft />
                   </button>
@@ -242,9 +249,16 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
                   <button
                     onClick={() => setPageIndex(i => Math.min(i + 1, totalPages - 1))}
                     disabled={pageIndex >= totalPages - 1}
-                    className="px-2 py-1 bg-transparent text-white rounded disabled:opacity-50"
+                    className="py-1 cursor-pointer bg-transparent text-white rounded disabled:opacity-50"
                   >
                     <ChevronRight />
+                  </button>
+                  <button
+                    onClick={() => setPageIndex(totalPages - 1)}
+                    disabled={pageIndex >= totalPages - 1}
+                    className="py-1 cursor-pointer bg-transparent text-white rounded disabled:opacity-50"
+                  >
+                    <ChevronLast />
                   </button>
                 </div>
                 <div className="flex items-center gap-2 text-white">

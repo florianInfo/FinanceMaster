@@ -82,7 +82,7 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
       accessorKey: 'description',
       cell: info => (
         <input
-          className="w-full bg-transparent"
+          className="w-full bg-transparent text-lg"
           defaultValue={info.getValue<string>()}
           onBlur={e => {
             const newValue = e.target.value
@@ -105,7 +105,7 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
           .filter((c): c is CategoryOption => !!c)
 
         return (
-          <div className="flex flex-wrap max-w-xl">
+          <div className="flex flex-wrap w-80">
             {opts.map(cat => (
               <CategoryTag
                 key={cat.value}
@@ -120,7 +120,7 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
     {
       header: 'Montant',
       accessorKey: 'amount',
-      cell: info => <ColoredAmount amount={info.getValue<number>()} />,
+      cell: info => <div className=""><ColoredAmount  amount={info.getValue<number>()} /></div>,
     },
     {
       id: 'actions',
@@ -136,7 +136,7 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
         </div>
       ),
       cell: info => (
-        <div className="flex justify-end">
+        <div className="flex justify-end max-w-sm">
           <button
             onClick={() => onDeleteSelected?.([info.row.original.id])}
             className="cursor-pointer text-(--color-text) hover:text-(--color-secondary)"
@@ -176,7 +176,7 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
               {hg.headers.map(header => (
                 <th
                   key={header.id}
-                  className={`cursor-pointer text-left p-2 font-medium text-white ${
+                  className={`cursor-pointer text-left p-2 text-xl font-medium text-white ${
                     header.column.id === 'actions' ? 'text-right' : ''
                   }`}
                   onClick={header.column.getToggleSortingHandler()}
@@ -195,9 +195,7 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
               {row.getVisibleCells().map(cell => (
                 <td
                   key={cell.id}
-                  className={`p-2 ${
-                    cell.column.id === 'categories' ? 'max-w-[200px]' : 'max-w-sm'
-                  } ${cell.column.id === 'actions' ? 'text-right' : ''}`}
+                  className={`p-2 text-lg`}
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>

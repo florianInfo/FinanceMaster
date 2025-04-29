@@ -13,7 +13,7 @@ interface CategoryTagProps {
 export const CategoryTag: React.FC<CategoryTagProps> = ({ category, onRemove }) => {
   return (
     <span
-      className="inline-flex items-center text-sm font-medium text-white rounded-full px-2 py-0.5 mr-1 mb-1"
+      className="inline-flex items-center text-lg font-medium text-white rounded-full px-2 py-0.5 mr-1 mb-1"
       style={{ backgroundColor: category.color }}
     >
       {category.label}

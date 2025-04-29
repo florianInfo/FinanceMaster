@@ -10,9 +10,13 @@ import ConfirmModal from '@/components/ConfirmModal'; // Ajouté pour la modal
 import { ModalConfigButton } from '@/types/ModalConfigButton';
 import { div, tr } from 'framer-motion/client';
 import { RotateCcw } from 'lucide-react';
+import { Snackbar } from '@/components/Snackbar';
 
 export default function TransactionsPage() {
   const { transactions, setTransactions, categories } = useTransactions();
+  const [showSnackbar, setShowSnackbar] = useState(false);
+  const [undoAction, setUndoAction] = useState<(() => void) | null>(null);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
 
   const [filters, setFilters] = useState<TransactionFiltersValues>({
     startDate: '',
@@ -24,7 +28,6 @@ export default function TransactionsPage() {
   });
 
   const [tableData, setTableData] = useState<Transaction[]>([]);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [hasTemporaryDeletions, setHasTemporaryDeletions] = useState(false);
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -40,6 +43,7 @@ export default function TransactionsPage() {
   }, [transactions, filters]);
 
   const filterData = (transactions: Transaction[]) => {
+    console.log(filters)
     return transactions.filter((tx) => {
       if (filters.startDate && new Date(tx.date) < new Date(filters.startDate)) return false;
       if (filters.endDate && new Date(tx.date) > new Date(filters.endDate)) return false;
@@ -55,30 +59,27 @@ export default function TransactionsPage() {
     setFilters(newFilters);
   }, []);
 
-  const handleSelectionChange = useCallback((ids: string[]) => {
-    setSelectedIds(ids);
-  }, []);
-
+  /** DELETE TRANSACTION */
   const handleDeleteRequest = (ids: string[]) => {
-    console.log(ids)
     if (ids.length === 0) return;
     setIdsToDelete(ids);
-    setModalMessage('Voulez-vous supprimer cette transaction de votre fichier de travail ou simplement de la vue courante ?');
-    setModalTitle('Suppression')
-    setModalButtons([
-      { label: 'Supprimer définitivement', onClick: () => confirmPermanentDelete(ids), variant: 'primary' },
-      { label: 'Supprimer temporairement', onClick: () => confirmTemporaryDelete(ids), variant: 'secondary' },
-      { label: 'Annuler', onClick: () => setShowConfirmModal(false), variant: 'cancel' },
-    ]);
-    setShowConfirmModal(true);
+    openConfirmationModal(
+      'Suppression',
+      'Voulez-vous supprimer cette transaction de votre fichier de travail ou simplement de la vue courante ?',
+      [
+        { label: 'Supprimer définitivement', onClick: () => confirmPermanentDelete(ids), variant: 'primary' },
+        { label: 'Supprimer temporairement', onClick: () => confirmTemporaryDelete(ids), variant: 'secondary' },
+        { label: 'Annuler', onClick: () => setShowConfirmModal(false), variant: 'cancel' },
+      ]
+    )
   };
+
   const confirmPermanentDelete = (ids: string[]) => {
     console.log("delete permanent  : ", ids)
     const updatedTransactions = transactions.filter(tx => !ids.includes(tx.id));
     setTransactions(updatedTransactions);
     localStorage.setItem('transactions', JSON.stringify(updatedTransactions));
     setShowConfirmModal(false);
-    setSelectedIds([]);
   };
   
   const confirmTemporaryDelete = (ids: string[]) => {
@@ -86,9 +87,100 @@ export default function TransactionsPage() {
     const updatedTableData = tableData.filter(tx => !ids.includes(tx.id));
     setTableData(updatedTableData);
     setShowConfirmModal(false);
-    setSelectedIds([]);
     setHasTemporaryDeletions(true);
   };
+
+  /** DELETE CATEGORY */
+  const handleRemoveCategory = (selectedIds: string[], transactionId: string, categoryId: string) => {
+    console.log(selectedIds)
+    if (selectedIds.length > 1 && selectedIds.includes(transactionId)) {
+      removeCategoryFromMultiple(selectedIds, categoryId);
+    } else {
+      const baseTransaction = transactions.find(tx => tx.id === transactionId);
+      if (!baseTransaction) return;
+      const similar = findSimilarTransactions(baseTransaction).filter((tx: Transaction) =>
+        tx.categories.includes(categoryId)
+      );
+  
+      if (similar.length > 0) {
+        openConfirmationModal(
+          `Retirer la catégorie partout ?`,
+          `${similar.length} transactions similaires contiennent aussi cette catégorie. Voulez-vous la retirer partout ?`,
+          [
+            { label: 'Oui', onClick: () => removeCategoryFromMultiple(
+              [transactionId, ...similar.map((t: Transaction) => t.id)],
+              categoryId
+            ), variant: 'primary' },
+            { label: 'Non', onClick: () => removeCategoryFromOne(transactionId, categoryId), variant: 'secondary' }
+          ]
+        );
+      } else {
+        removeCategoryFromOne(transactionId, categoryId);
+      }
+    }
+  };
+  
+  const removeCategoryFromOne = (transactionId: string, categoryId: string) => {
+    setTransactions((prev: Transaction[]) =>
+      prev.map(tx =>
+        tx.id === transactionId
+          ? { ...tx, categories: tx.categories.filter(cat => cat !== categoryId) }
+          : tx
+      )
+    );
+    createUndo(() => {
+      setTransactions((prev: Transaction[]) =>
+        prev.map(tx =>
+          tx.id === transactionId
+            ? { ...tx, categories: [...tx.categories, categoryId] }
+            : tx
+        )
+      );
+    });
+  };
+  
+  const removeCategoryFromMultiple = (transactionIds: string[], categoryId: string) => {
+    const transactionFiltred = transactions.filter(tx => transactionIds.includes(tx.id) && tx.categories.includes(categoryId)).map(tx => tx.id)
+    setTransactions(prev =>
+      prev.map(tx =>
+        transactionFiltred.includes(tx.id)
+          ? { ...tx, categories: tx.categories.filter(cat => cat !== categoryId) }
+          : tx
+      )
+    );
+    createUndo(() => {
+      setTransactions(prev =>
+        prev.map(tx =>
+          transactionFiltred.includes(tx.id)
+            ? { ...tx, categories: [...tx.categories, categoryId] }
+            : tx
+        )
+      );
+    });
+  };
+  
+  const createUndo = (undoFn: () => void) => {
+    setUndoAction(() => undoFn);
+    setSnackbarMessage('Catégorie retirée.');
+    setShowSnackbar(true);
+  };
+  
+  const findSimilarTransactions = (baseTransaction: Transaction) => {
+    return transactions.filter(tx =>
+      tx.description === baseTransaction.description &&
+      (tx.amount < 0) === (baseTransaction.amount < 0)
+      && tx.id != baseTransaction.id
+    );
+  };
+
+
+  const openConfirmationModal = (title: string, message: string, buttons: ModalConfigButton[]) => {
+    setModalMessage(message);
+    setModalTitle(title)
+    setModalButtons(buttons);
+    setShowConfirmModal(true);
+  }
+  
 
   const handleRefreshData = () => {
     setTableData(filterData(transactions))
@@ -129,10 +221,11 @@ export default function TransactionsPage() {
       <TransactionTable
         data={tableData}
         setData={setTableData}
-        onSelectionChange={handleSelectionChange}
-        onDeleteSelected={handleDeleteRequest} // <-- important
+        onDeleteSelected={handleDeleteRequest} 
+        onRemoveCategory={handleRemoveCategory}// <-- important
       />
 
+      
       <ConfirmModal
         isOpen={showConfirmModal}
         onClose={() => setShowConfirmModal(false)}
@@ -140,6 +233,19 @@ export default function TransactionsPage() {
         message={modalMessage}
         buttons={modalButtons}
       />
+
+      {showSnackbar && (
+        <div className="relative">
+        <Snackbar
+          message={snackbarMessage}
+          onUndo={() => {
+            undoAction?.();
+            setShowSnackbar(false);
+          }}
+          onClose={() => setShowSnackbar(false)}
+        />
+        </div>
+      )}
     </main>
   );
 }

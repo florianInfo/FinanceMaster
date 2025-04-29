@@ -23,10 +23,11 @@ interface Props {
   data: Transaction[]
   setData: (newData: Transaction[]) => void
   onSelectionChange?: (selectedIds: string[]) => void
-  onDeleteSelected?: (ids: string[]) => void
+  onDeleteSelected?: (ids: string[]) => void,
+  onRemoveCategory?: (ids: string[], transactionId: string, categoryId: string) => void
 }
 
-export default function TransactionTable({ data, setData, onSelectionChange, onDeleteSelected }: Props) {
+export default function TransactionTable({ data, setData, onSelectionChange, onDeleteSelected, onRemoveCategory }: Props) {
   const { categories: allCategories } = useTransactions()
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [pageSize, setPageSize] = useState(20)
@@ -36,6 +37,13 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
   useEffect(() => {
     onSelectionChange?.(Array.from(selectedIds))
   }, [selectedIds, onSelectionChange])
+
+  useEffect(() => {
+    const maxPage = Math.floor(data.length / pageSize)
+    if(pageIndex > maxPage){
+      setPageIndex(0)
+    }
+  }, [data])
 
   const toggleRowSelection = (id: string) => {
     setSelectedIds(prev => {
@@ -110,7 +118,7 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
               <CategoryTag
                 key={cat.value}
                 category={cat}
-                onRemove={() => {/* rien ici pour l’instant */}}
+                onRemove={() => onRemoveCategory?.(Array.from(selectedIds), tx.id, cat.value)}
               />
             ))}
           </div>

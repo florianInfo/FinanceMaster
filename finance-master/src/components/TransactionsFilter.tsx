@@ -33,6 +33,7 @@ const TransactionFilters: React.FC<TransactionFiltersProps> = ({
     maxAmount: initialValues.maxAmount ?? '',
   });
   const [hasMounted, setHasMounted] = useState(false);
+  const [selectOptions, setSelectOptions] = useState<CategoryOption[]>([]);
 
   useEffect(() => {
     setHasMounted(true);
@@ -41,6 +42,16 @@ const TransactionFilters: React.FC<TransactionFiltersProps> = ({
   useEffect(() => {
     onFiltersChange(filters);
   }, [filters, onFiltersChange]);
+
+  useEffect(() => {
+    setSelectOptions(categories.map(c => ({ value: c.value, label: c.label, color: c.color })));
+    const updatedSelectedCategories = categories.filter(cat => filters.categories.includes(cat.value))
+
+    // Met à jour les filtres si des catégories sélectionnées ne sont plus disponibles
+    if (updatedSelectedCategories.length !== filters.categories.length) {
+      handleCategorySelect(updatedSelectedCategories);
+    }
+  }, [categories]);
 
   const clearField = (name: keyof TransactionFiltersValues) => {
     setFilters(prev => ({ ...prev, [name]: '' }));
@@ -59,13 +70,11 @@ const TransactionFilters: React.FC<TransactionFiltersProps> = ({
   };
 
   const handleCategorySelect = (
-    selected: { value: string; label: string }[] | null
+    selected: CategoryOption[] | null
   ) => {
-    const values = selected ? selected.map(opt => opt.value) : [];
-    setFilters(prev => ({ ...prev, categories: values }));
+    const values = selected ? selected.map(c => c.value) : [];
+    setFilters(prev => ({ ...prev, categories: values}));
   };
-
-  const selectOptions = categories.map(c => ({ value: c.value, label: c.label, color: c.color }));
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 bg-white rounded-lg shadow">

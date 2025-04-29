@@ -19,7 +19,7 @@ export const CategoryTag: React.FC<CategoryTagProps> = ({ category, onRemove }) 
       {category.label}
       <button
         onClick={() => onRemove(category.value)}
-        className="ml-1 focus:outline-none"
+        className="ml-1 focus:outline-none cursor-pointer"
       >
         <X size={12} />
       </button>

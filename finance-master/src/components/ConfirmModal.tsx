@@ -27,6 +27,11 @@ export default function ConfirmModal({ isOpen, onClose, title, message, buttons 
     }
   }
 
+  const handleClick = (btn: ModalConfigButton) => {
+    btn.onClick()
+    onClose()
+  }
+
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
       <motion.div
@@ -42,7 +47,7 @@ export default function ConfirmModal({ isOpen, onClose, title, message, buttons 
           {buttons.map((btn, idx) => (
             <button
               key={idx}
-              onClick={btn.onClick}
+              onClick={() => handleClick(btn)}
               className={`${getButtonStyle(btn.variant)} px-4 py-2 rounded-xl cursor-pointer`}
             >
               {btn.label}

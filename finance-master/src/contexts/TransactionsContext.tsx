@@ -6,7 +6,7 @@ import type { CategoryOption } from '@/types/CategoryOption';
 
 interface TransactionsContextType {
   transactions: Transaction[];
-  setTransactions: (txs: Transaction[]) => void;
+  setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>;
   addTransactions: (txs: Transaction[]) => void;
   categories: CategoryOption[];
 }

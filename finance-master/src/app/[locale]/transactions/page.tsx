@@ -5,12 +5,11 @@ import { useTransactions } from '@/contexts/TransactionsContext';
 import TransactionTable from '@/components/TransactionTable';
 import { Transaction } from '@/types/Transaction';
 import TransactionFilters, { TransactionFiltersValues } from '@/components/TransactionsFilter';
-import { CategoryOption } from '@/types/CategoryOption';
 import ConfirmModal from '@/components/ConfirmModal'; // Ajouté pour la modal
 import { ModalConfigButton } from '@/types/ModalConfigButton';
-import { div, tr } from 'framer-motion/client';
 import { RotateCcw } from 'lucide-react';
 import { Snackbar } from '@/components/Snackbar';
+import CategoryAddComponent from '@/components/CategoryAddComponent';
 
 export default function TransactionsPage() {
   const { transactions, setTransactions, categories } = useTransactions();
@@ -35,8 +34,9 @@ export default function TransactionsPage() {
   const [modalMessage, setModalMessage] = useState('');
   const [modalButtons, setModalButtons] = useState<ModalConfigButton[]>([]);
   const [idsToDelete, setIdsToDelete] = useState<string[]>([]);
+  const [idsSelected, setIdsSelected] = useState<string[]>([]);
 
-  // Filtrage dynamique
+  /* FILTERS **/
   useEffect(() => {
     const filtered = filterData(transactions)
     setTableData(filtered);
@@ -58,6 +58,90 @@ export default function TransactionsPage() {
   const handleFiltersChange = useCallback((newFilters: TransactionFiltersValues) => {
     setFilters(newFilters);
   }, []);
+
+  /** ADD CATEGORIES */
+  const handleAddCategory = (categoriesId: string[]) => {
+    console.log(idsSelected);
+    if (idsSelected.length > 1) {
+      applyCategoriesToTransactions(idsSelected, categoriesId);
+    } else {
+      const baseTransaction = transactions.find(tx => tx.id === idsSelected[0]);
+  
+      if (!baseTransaction) return;
+  
+      const similarTransactions = findSimilarTransactions(baseTransaction).filter((tx: Transaction) =>
+        categoriesId.some(categoryId => !tx.categories.includes(categoryId))
+      );
+  
+      if (similarTransactions.length > 0) {
+        openConfirmationModal(
+          'Appliquer la catégorie à toutes les transactions similaires ?',
+          `${similarTransactions.length} transactions similaires ont été trouvées. Voulez-vous appliquer la catégorie à toutes ces transactions ?`,
+          [
+            {
+              label: 'Oui',
+              onClick: () => applyCategoriesToTransactions([...idsSelected, ...similarTransactions.map(tx => tx.id)], categoriesId),
+              variant: 'primary'
+            },
+            {
+              label: 'Non',
+              onClick: () => applyCategoriesToTransactions(idsSelected, categoriesId),
+              variant: 'secondary'
+            },
+            {
+              label: 'Annuler',
+              onClick: () => setShowConfirmModal(false),
+              variant: 'cancel'
+            }
+          ]
+        );
+      } else {
+        applyCategoriesToTransactions(idsSelected, categoriesId);
+      }
+    }
+  };
+  
+  
+  
+  const applyCategoriesToTransactions = (transactionIds: string[], categoryIds: string[]) => {
+    // Dictionnaire pour suivre les catégories ajoutées par transaction
+    const addedCategoriesMap: Record<string, string[]> = {};
+  
+    const updatedTransactions = transactions.map(tx => {
+      if (transactionIds.includes(tx.id)) {
+        // Identifier les nouvelles catégories à ajouter
+        const newCategories = categoryIds.filter(catId => !tx.categories.includes(catId));
+  
+        if (newCategories.length > 0) {
+          addedCategoriesMap[tx.id] = newCategories;
+          return { ...tx, categories: [...tx.categories, ...newCategories] };
+        }
+      }
+      return tx;
+    });
+  
+    setTransactions(updatedTransactions);
+  
+    // Configuration de l'annulation
+    createUndo('Catégories ajoutées.', () => {
+      setTransactions(prev =>
+        prev.map(tx => {
+          const addedCategories = addedCategoriesMap[tx.id];
+          if (addedCategories) {
+            return {
+              ...tx,
+              categories: tx.categories.filter(cat => !addedCategories.includes(cat))
+            };
+          }
+          return tx;
+        })
+      );
+    });
+  };
+  
+  
+  
+
 
   /** DELETE TRANSACTION */
   const handleDeleteRequest = (ids: string[]) => {
@@ -128,7 +212,7 @@ export default function TransactionsPage() {
           : tx
       )
     );
-    createUndo(() => {
+    createUndo('Catégorie retirée.', () => {
       setTransactions((prev: Transaction[]) =>
         prev.map(tx =>
           tx.id === transactionId
@@ -148,7 +232,7 @@ export default function TransactionsPage() {
           : tx
       )
     );
-    createUndo(() => {
+    createUndo('Catégorie retirée.', () => {
       setTransactions(prev =>
         prev.map(tx =>
           transactionFiltred.includes(tx.id)
@@ -158,10 +242,12 @@ export default function TransactionsPage() {
       );
     });
   };
+
+  /** UTILS*/
   
-  const createUndo = (undoFn: () => void) => {
+  const createUndo = (message: string, undoFn: () => void) => {
     setUndoAction(() => undoFn);
-    setSnackbarMessage('Catégorie retirée.');
+    setSnackbarMessage(message);
     setShowSnackbar(true);
   };
   
@@ -173,14 +259,12 @@ export default function TransactionsPage() {
     );
   };
 
-
   const openConfirmationModal = (title: string, message: string, buttons: ModalConfigButton[]) => {
     setModalMessage(message);
     setModalTitle(title)
     setModalButtons(buttons);
     setShowConfirmModal(true);
   }
-  
 
   const handleRefreshData = () => {
     setTableData(filterData(transactions))
@@ -218,9 +302,17 @@ export default function TransactionsPage() {
         </div>
       )}
 
+      {idsSelected.length > 0 && 
+        <CategoryAddComponent
+          categories={categories}
+          onAddCategory={handleAddCategory}
+        />
+      }
+
       <TransactionTable
         data={tableData}
         setData={setTableData}
+        onSelectionChange={setIdsSelected}
         onDeleteSelected={handleDeleteRequest} 
         onRemoveCategory={handleRemoveCategory}// <-- important
       />

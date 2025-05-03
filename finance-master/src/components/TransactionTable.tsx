@@ -36,7 +36,7 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
 
   useEffect(() => {
     onSelectionChange?.(Array.from(selectedIds))
-  }, [selectedIds, onSelectionChange])
+  }, [selectedIds])
 
   useEffect(() => {
     const maxPage = Math.floor(data.length / pageSize)

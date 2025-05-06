@@ -1,85 +1,84 @@
-'use client';
+'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react';
-import type { Transaction } from '@/types/Transaction';
-import type { CategoryOption } from '@/types/CategoryOption';
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import type { Transaction } from '@/types/Transaction'
+import type { CategoryOption } from '@/types/CategoryOption'
 
 interface TransactionsContextType {
-  transactions: Transaction[];
-  setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>;
-  addTransactions: (txs: Transaction[]) => void;
-  categories: CategoryOption[];
+  transactions: Transaction[]
+  setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>
+  addTransactions: (txs: Transaction[]) => void
+  categories: CategoryOption[]
 }
 
-const LS_TX_KEY = 'finance-transactions';
-const LS_CAT_COLOR_KEY = 'finance-category-colors';
+const LS_TX_KEY = 'finance-transactions'
+const LS_CAT_COLOR_KEY = 'finance-category-colors'
 
-const TransactionsContext = createContext<TransactionsContextType | undefined>(undefined);
+const TransactionsContext = createContext<TransactionsContextType | undefined>(undefined)
 
 export const TransactionsProvider = ({ children }: { children: React.ReactNode }) => {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [categories, setCategories] = useState<CategoryOption[]>([]);
-  const [catColors, setCatColors] = useState<Record<string, string>>({});
+  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [categories, setCategories] = useState<CategoryOption[]>([])
+  const [catColors, setCatColors] = useState<Record<string, string>>({})
+  const [isHydrated, setIsHydrated] = useState(false);
 
   // 1) Charger transactions
   useEffect(() => {
-    const stored = localStorage.getItem(LS_TX_KEY);
-    if (stored) setTransactions(JSON.parse(stored));
-  }, []);
+    const stored = localStorage.getItem(LS_TX_KEY)
+    if (stored) {
+      setTransactions(JSON.parse(stored))
+    }
+    setIsHydrated(true)
+  }, [])
 
   // 2) Charger mapping catégorie→couleur
   useEffect(() => {
-    const stored = localStorage.getItem(LS_CAT_COLOR_KEY);
-    if (stored) setCatColors(JSON.parse(stored));
-  }, []);
+    const stored = localStorage.getItem(LS_CAT_COLOR_KEY)
+    if (stored) setCatColors(JSON.parse(stored))
+  }, [])
 
-  // Générateur de couleur hex unique
   const generateUniqueColor = (existing: string[]) => {
-    let color: string;
+    let color: string
     do {
-      color = '#' + Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0');
-    } while (existing.includes(color));
-    return color;
-  };
+      color = '#' + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0')
+    } while (existing.includes(color))
+    return color
+  }
 
-  // 3) À chaque modification de transactions, mettre à jour le localStorage et reconstruire les catégories
+  // 3) À chaque modification, reconstruire catégories et sauvegarder si chargé
   useEffect(() => {
-    // Persist transactions
-    localStorage.setItem(LS_TX_KEY, JSON.stringify(transactions));
+    if (!isHydrated) return 
+    localStorage.setItem(LS_TX_KEY, JSON.stringify(transactions))
 
-    // Extraire noms uniques
-    const uniqueCats = new Set<string>();
-    transactions.forEach(tx => {
-      tx.categories?.forEach(cat => uniqueCats.add(cat));
-    });
+    const uniqueCats = new Set<string>()
+    transactions.forEach(tx => tx.categories?.forEach(cat => uniqueCats.add(cat)))
 
-    // Créer ou récupérer les couleurs
-    const colorsMap = { ...catColors };
-    let changed = false;
+    const colorsMap = { ...catColors }
+    let changed = false
     Array.from(uniqueCats).forEach(cat => {
       if (!colorsMap[cat]) {
-        const newColor = generateUniqueColor(Object.values(colorsMap));
-        colorsMap[cat] = newColor;
-        changed = true;
+        const newColor = generateUniqueColor(Object.values(colorsMap))
+        colorsMap[cat] = newColor
+        changed = true
       }
-    });
+    })
+
     if (changed) {
-      setCatColors(colorsMap);
-      localStorage.setItem(LS_CAT_COLOR_KEY, JSON.stringify(colorsMap));
+      setCatColors(colorsMap)
+      localStorage.setItem(LS_CAT_COLOR_KEY, JSON.stringify(colorsMap))
     }
 
-    // Construire le tableau d'options
     const opts: CategoryOption[] = Array.from(uniqueCats).map(cat => ({
       value: cat,
       label: cat,
       color: colorsMap[cat],
-    }));
-    setCategories(opts);
-  }, [transactions, catColors]);
+    }))
+    setCategories(opts)
+  }, [transactions, catColors])
 
   const addTransactions = (newTxs: Transaction[]) => {
-    setTransactions(prev => [...prev, ...newTxs]);
-  };
+    setTransactions(prev => [...prev, ...newTxs])
+  }
 
   return (
     <TransactionsContext.Provider
@@ -87,11 +86,11 @@ export const TransactionsProvider = ({ children }: { children: React.ReactNode }
     >
       {children}
     </TransactionsContext.Provider>
-  );
-};
+  )
+}
 
 export const useTransactions = () => {
-  const ctx = useContext(TransactionsContext);
-  if (!ctx) throw new Error('useTransactions must be used within TransactionsProvider');
-  return ctx;
-};
+  const ctx = useContext(TransactionsContext)
+  if (!ctx) throw new Error('useTransactions must be used within TransactionsProvider')
+  return ctx
+}

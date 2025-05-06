@@ -41,9 +41,9 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
   useEffect(() => {
     const maxPage = Math.floor(data.length / pageSize)
     if(pageIndex > maxPage){
-      setPageIndex(0)
+      setPageIndex(maxPage)
     }
-  }, [data])
+  }, [data, pageSize])
 
   const toggleRowSelection = (id: string) => {
     setSelectedIds(prev => {

@@ -7,6 +7,7 @@ import { parseCsvToTransactions } from '@/libs/FileUploader';
 import { useTransactions } from '@/contexts/TransactionsContext';
 import CurrencySelector from './CurrencySelector';
 import LanguageSelector from './LanguageSelector';
+import { useTranslations } from 'next-intl';
 
 const THEMES = [
   { name: 'dark-red', color: 'bg-black border-red-500' },
@@ -16,13 +17,13 @@ const THEMES = [
 ];
 
 export default function Topbar() {
-  const [language, setLanguage] = useState('fr');
-  const { theme, setTheme } = useTheme();
+  const t = useTranslations('Topbar');
+  const { setTheme } = useTheme();
   const { transactions, addTransactions } = useTransactions();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDownload = () => {
-    const data = { transactions: transactions }; // <-- à remplacer par les vraies données
+    const data = { transactions: transactions };
     const blob = new Blob([JSON.stringify(data, null, 2)], {
       type: 'application/json',
     });
@@ -36,9 +37,9 @@ export default function Topbar() {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
-  
-    let currentTransactions = [...transactions]; // clone en mémoire
-  
+
+    let currentTransactions = [...transactions];
+
     for (const file of Array.from(files)) {
       const content = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -46,12 +47,12 @@ export default function Topbar() {
         reader.onerror = reject;
         reader.readAsText(file);
       });
-  
+
       if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
         const lastId = Math.max(0, ...currentTransactions.map(t => parseInt(t.id)).filter(Number.isFinite));
         const parsed = parseCsvToTransactions(content, lastId);
         addTransactions(parsed);
-        currentTransactions = [...currentTransactions, ...parsed]; // update pour les prochains
+        currentTransactions = [...currentTransactions, ...parsed];
       } else if (file.type === 'application/json' || file.name.endsWith('.json')) {
         try {
           const parsed = JSON.parse(content);
@@ -65,7 +66,6 @@ export default function Topbar() {
                 currentIds.add(t.id);
                 return t;
               }
-              // Sinon on génère un nouveau id
               lastId++;
               return {
                 ...t,
@@ -82,7 +82,6 @@ export default function Topbar() {
       }
     }
   };
-  
 
   return (
     <div className="flex items-center justify-between border-b px-4 shadow-sm h-12">
@@ -104,7 +103,7 @@ export default function Topbar() {
               key={themeOption.name}
               className={`w-5 h-5 cursor-pointer rounded-full border-2 ${themeOption.color}`}
               onClick={() => setTheme(themeOption.name)}
-              aria-label={`Thème ${themeOption.name}`}
+              aria-label={t('theme', { name: themeOption.name })}
             />
           ))}
         </div>
@@ -115,7 +114,7 @@ export default function Topbar() {
         <button
           onClick={handleDownload}
           className="p-1 cursor-pointer hover:text-(--color-secondary) transition"
-          title="Exporter en JSON"
+          title={t('export')}
         >
           <Download size={20} />
         </button>
@@ -123,7 +122,7 @@ export default function Topbar() {
         <button
           onClick={() => fileInputRef.current?.click()}
           className="p-1 cursor-pointer hover:text-(--color-secondary) transition"
-          title="Importer un ou plusieurs fichiers CSV ou JSON"
+          title={t('import')}
         >
           <HardDriveUpload size={20} />
         </button>

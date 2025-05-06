@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import CreatableSelect from 'react-select/creatable';
 import { CategoryOption } from '@/types/CategoryOption';
 
@@ -13,6 +14,7 @@ const CategoryAddComponent: React.FC<CategoryAddComponentProps> = ({
   categories,
   onAddCategory,
 }) => {
+  const t = useTranslations('CategoryAdd');
   const [selectedOptions, setSelectedOptions] = useState<CategoryOption[]>([]);
   const [options, setOptions] = useState<CategoryOption[]>([]);
 
@@ -24,7 +26,7 @@ const CategoryAddComponent: React.FC<CategoryAddComponentProps> = ({
     const newOption: CategoryOption = {
       label: inputValue,
       value: inputValue.toLowerCase().replace(/\s+/g, '-'),
-      color: '#ccc', // Couleur par défaut pour les nouvelles catégories
+      color: '#ccc',
     };
     setOptions((prev) => [...prev, newOption]);
     setSelectedOptions((prev) => [...prev, newOption]);
@@ -45,7 +47,7 @@ const CategoryAddComponent: React.FC<CategoryAddComponentProps> = ({
           value={selectedOptions}
           onChange={(newValue) => setSelectedOptions(newValue as CategoryOption[])}
           onCreateOption={handleCreateOption}
-          placeholder="Ajouter des catégories..."
+          placeholder={t('placeholder')}
           className="react-select-container text-black"
           classNamePrefix="react-select"
           styles={{
@@ -87,7 +89,7 @@ const CategoryAddComponent: React.FC<CategoryAddComponentProps> = ({
             : 'bg-(--color-primary) text-white cursor-pointer hover:bg-(--color-secondary)'
         }`}
       >
-        Appliquer
+        {t('apply')}
       </button>
     </div>
   );

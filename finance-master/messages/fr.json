@@ -6,9 +6,70 @@
       "settings": "Paramètres"
     }
   },
+  "Topbar": {
+    "export": "Exporter en JSON",
+    "import": "Importer un ou plusieurs fichiers CSV ou JSON",
+    "theme": "Thème {name}"
+  },
+  "Sidebar": {
+    "appTitle": "FinanceMaster",
+    "dashboard": "Accueil",
+    "transactions": "Transactions",
+    "statistics": "Statistiques",
+    "investments": "Investissements",
+    "previsions": "Prévisions",
+    "budgets": "Budgets",
+    "settings": "Paramètres"
+  },
   "Dashboard": {
     "title": "Bienvenue à l'Accueil",
     "description": "Voici une vue d'ensemble de vos finances",
     "loginButton": "Connectez vous"
+  },
+  "Transactions": {
+    "title": "Mes Transactions",
+    "confirmApplyToAllTitle": "Appliquer la catégorie à toutes les transactions similaires ?",
+    "confirmApplyToAllMessage": "{count} transactions similaires ont été trouvées. Voulez-vous appliquer la catégorie à toutes ces transactions ?",
+    "categoriesAdded": "Catégories ajoutées.",
+    "deleteTitle": "Suppression",
+    "deleteMessage": "Voulez-vous supprimer cette transaction de votre fichier de travail ou simplement de la vue courante ?",
+    "deletePermanent": "Supprimer définitivement",
+    "deleteTemporary": "Supprimer temporairement",
+    "cancel": "Annuler",
+    "confirmRemoveAllTitle": "Retirer la catégorie partout ?",
+    "confirmRemoveAllMessage": "{count} transactions similaires contiennent aussi cette catégorie. Voulez-vous la retirer partout ?",
+    "categoryRemoved": "Catégorie retirée.",
+    "refresh": "Rafraîchir",
+    "refreshConfirm": "Cette action resynchronisera toutes les données sauvegardées. Voulez-vous continuer ?",
+    "yes": "Oui",
+    "no": "Non"
+  },
+  "TransactionFilters": {
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "categories": "Catégories",
+    "selectPlaceholder": "Sélectionnez...",
+    "description": "Description",
+    "searchPlaceholder": "Rechercher…",
+    "minAmount": "Montant minimum",
+    "maxAmount": "Montant maximum"
+  },
+  "TransactionTable": {
+    "date": "Date",
+    "description": "Description",
+    "categories": "Catégories",
+    "amount": "Montant",
+    "deleteSelected": "Supprimer la sélection",
+    "totalTransactions": "Total : {count} transactions",
+    "debits": "Débits",
+    "credits": "Crédits",
+    "rowsPerPage": "Lignes/page"
+  },
+  "CategoryAdd": {
+    "placeholder": "Ajouter des catégories...",
+    "apply": "Appliquer"
+  },
+  "Snackbar": {
+    "undo": "Annuler"
   }
 }

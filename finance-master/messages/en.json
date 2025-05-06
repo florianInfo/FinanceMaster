@@ -6,9 +6,70 @@
       "settings": "Settings"
     }
   },
+  "Topbar": {
+    "export": "Export as JSON",
+    "import": "Import one or more CSV or JSON files",
+    "theme": "Theme {name}"
+  },
+  "Sidebar": {
+    "appTitle": "FinanceMaster",
+    "dashboard": "Dashboard",
+    "transactions": "Transactions",
+    "statistics": "Statistics",
+    "investments": "Investments",
+    "previsions": "Forecasts",
+    "budgets": "Budgets",
+    "settings": "Settings"
+  },
   "Dashboard": {
     "title": "Welcome to the dashboard",
     "description": "Here is an overview of your finances.",
     "loginButton": "Log in"
+  },
+  "Transactions": {
+    "title": "My Transactions",
+    "confirmApplyToAllTitle": "Apply category to all similar transactions?",
+    "confirmApplyToAllMessage": "{count} similar transactions were found. Do you want to apply the category to all of them?",
+    "categoriesAdded": "Categories added.",
+    "deleteTitle": "Delete",
+    "deleteMessage": "Do you want to delete this transaction permanently or just from the current view?",
+    "deletePermanent": "Delete permanently",
+    "deleteTemporary": "Delete temporarily",
+    "cancel": "Cancel",
+    "confirmRemoveAllTitle": "Remove category everywhere?",
+    "confirmRemoveAllMessage": "{count} similar transactions also contain this category. Do you want to remove it everywhere?",
+    "categoryRemoved": "Category removed.",
+    "refresh": "Refresh",
+    "refreshConfirm": "This action will resynchronize all saved data. Do you want to continue?",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "TransactionFilters": {
+    "startDate": "Start date",
+    "endDate": "End date",
+    "categories": "Categories",
+    "selectPlaceholder": "Select...",
+    "description": "Description",
+    "searchPlaceholder": "Search…",
+    "minAmount": "Minimum amount",
+    "maxAmount": "Maximum amount"
+  },
+  "TransactionTable": {
+    "date": "Date",
+    "description": "Description",
+    "categories": "Categories",
+    "amount": "Amount",
+    "deleteSelected": "Delete selected",
+    "totalTransactions": "Total: {count} transactions",
+    "debits": "Debits",
+    "credits": "Credits",
+    "rowsPerPage": "Rows/page"
+  },
+  "CategoryAdd": {
+    "placeholder": "Add categories...",
+    "apply": "Apply"
+  },
+  "Snackbar": {
+    "undo": "Undo"
   }
 }

@@ -1,8 +1,10 @@
 "use client"
+
 import React, { useState, useEffect } from 'react';
 import Select from 'react-select';
 import { X } from 'lucide-react';
 import { CategoryOption } from '@/types/CategoryOption';
+import { useTranslations } from 'next-intl';
 
 export interface TransactionFiltersValues {
   startDate: string;
@@ -24,6 +26,7 @@ const TransactionFilters: React.FC<TransactionFiltersProps> = ({
   initialValues = {},
   onFiltersChange,
 }) => {
+  const t = useTranslations('TransactionFilters');
   const [filters, setFilters] = useState<TransactionFiltersValues>({
     startDate: initialValues.startDate || '',
     endDate: initialValues.endDate || '',
@@ -45,9 +48,8 @@ const TransactionFilters: React.FC<TransactionFiltersProps> = ({
 
   useEffect(() => {
     setSelectOptions(categories.map(c => ({ value: c.value, label: c.label, color: c.color })));
-    const updatedSelectedCategories = categories.filter(cat => filters.categories.includes(cat.value))
+    const updatedSelectedCategories = categories.filter(cat => filters.categories.includes(cat.value));
 
-    // Met à jour les filtres si des catégories sélectionnées ne sont plus disponibles
     if (updatedSelectedCategories.length !== filters.categories.length) {
       handleCategorySelect(updatedSelectedCategories);
     }
@@ -69,18 +71,15 @@ const TransactionFilters: React.FC<TransactionFiltersProps> = ({
     }));
   };
 
-  const handleCategorySelect = (
-    selected: CategoryOption[] | null
-  ) => {
+  const handleCategorySelect = (selected: CategoryOption[] | null) => {
     const values = selected ? selected.map(c => c.value) : [];
-    setFilters(prev => ({ ...prev, categories: values}));
+    setFilters(prev => ({ ...prev, categories: values }));
   };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 bg-white rounded-lg shadow">
-      {/* Date de début */}
       <label className="flex flex-col relative">
-        <span className="mb-1 text-sm font-medium text-gray-700">Date de début</span>
+        <span className="mb-1 text-sm font-medium text-gray-700">{t('startDate')}</span>
         <input
           type="date"
           name="startDate"
@@ -99,9 +98,8 @@ const TransactionFilters: React.FC<TransactionFiltersProps> = ({
         )}
       </label>
 
-      {/* Date de fin */}
       <label className="flex flex-col relative">
-        <span className="mb-1 text-sm font-medium text-gray-700">Date de fin</span>
+        <span className="mb-1 text-sm font-medium text-gray-700">{t('endDate')}</span>
         <input
           type="date"
           name="endDate"
@@ -120,17 +118,14 @@ const TransactionFilters: React.FC<TransactionFiltersProps> = ({
         )}
       </label>
 
-      {/* Catégories */}
       <label className="flex flex-col">
-        <span className="mb-1 text-sm font-medium text-gray-700">Catégories</span>
+        <span className="mb-1 text-sm font-medium text-gray-700">{t('categories')}</span>
         {hasMounted && (
           <Select
             options={selectOptions}
             isMulti
-            placeholder="Sélectionnez..."
-            value={selectOptions.filter(opt =>
-              filters.categories.includes(opt.value)
-            )}
+            placeholder={t('selectPlaceholder')}
+            value={selectOptions.filter(opt => filters.categories.includes(opt.value))}
             onChange={handleCategorySelect}
             className="react-select-container text-black"
             classNamePrefix="react-select"
@@ -163,27 +158,24 @@ const TransactionFilters: React.FC<TransactionFiltersProps> = ({
                 },
               }),
             }}
-            
           />
         )}
       </label>
 
-      {/* Description */}
       <label className="flex flex-col">
-        <span className="mb-1 text-sm font-medium text-gray-700">Description</span>
+        <span className="mb-1 text-sm font-medium text-gray-700">{t('description')}</span>
         <input
           type="text"
           name="description"
           value={filters.description}
           onChange={handleInputChange}
-          placeholder="Rechercher…"
+          placeholder={t('searchPlaceholder')}
           className="px-3 py-2 text-black border rounded focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
         />
       </label>
 
-      {/* Montant minimum */}
       <label className="flex flex-col relative">
-        <span className="mb-1 text-sm font-medium text-gray-700">Montant minimum</span>
+        <span className="mb-1 text-sm font-medium text-gray-700">{t('minAmount')}</span>
         <input
           type="number"
           name="minAmount"
@@ -204,9 +196,8 @@ const TransactionFilters: React.FC<TransactionFiltersProps> = ({
         )}
       </label>
 
-      {/* Montant maximum */}
       <label className="flex flex-col relative">
-        <span className="mb-1 text-sm font-medium text-gray-700">Montant maximum</span>
+        <span className="mb-1 text-sm font-medium text-gray-700">{t('maxAmount')}</span>
         <input
           type="number"
           name="maxAmount"

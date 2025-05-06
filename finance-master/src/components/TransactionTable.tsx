@@ -10,7 +10,14 @@ import {
   ColumnDef,
   SortingState,
 } from '@tanstack/react-table'
-import { ChevronRight, ChevronLeft, ChevronFirst, ChevronLast, Trash2 } from 'lucide-react'
+import {
+  ChevronRight,
+  ChevronLeft,
+  ChevronFirst,
+  ChevronLast,
+  Trash2,
+} from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useTransactions } from '@/contexts/TransactionsContext'
 import type { Transaction } from '@/types/Transaction'
 import type { CategoryOption } from '@/types/CategoryOption'
@@ -23,12 +30,20 @@ interface Props {
   data: Transaction[]
   setData: (newData: Transaction[]) => void
   onSelectionChange?: (selectedIds: string[]) => void
-  onDeleteSelected?: (ids: string[]) => void,
+  onDeleteSelected?: (ids: string[]) => void
   onRemoveCategory?: (ids: string[], transactionId: string, categoryId: string) => void
 }
 
-export default function TransactionTable({ data, setData, onSelectionChange, onDeleteSelected, onRemoveCategory }: Props) {
+export default function TransactionTable({
+  data,
+  setData,
+  onSelectionChange,
+  onDeleteSelected,
+  onRemoveCategory,
+}: Props) {
   const { categories: allCategories } = useTransactions()
+  const t = useTranslations('TransactionTable')
+
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [pageSize, setPageSize] = useState(20)
   const [pageIndex, setPageIndex] = useState(0)
@@ -40,7 +55,7 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
 
   useEffect(() => {
     const maxPage = Math.floor(data.length / pageSize)
-    if(pageIndex > maxPage){
+    if (pageIndex > maxPage) {
       setPageIndex(maxPage)
     }
   }, [data, pageSize])
@@ -55,9 +70,9 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
 
   const toggleAllRows = () => {
     if (selectedIds.size === data.length) {
-      setSelectedIds(new Set()) // Déselectionner tout
+      setSelectedIds(new Set())
     } else {
-      setSelectedIds(new Set(data.map(tx => tx.id))) // Sélectionner tout
+      setSelectedIds(new Set(data.map(tx => tx.id)))
     }
   }
 
@@ -81,12 +96,12 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
       ),
     },
     {
-      header: 'Date',
+      header: t('date'),
       accessorKey: 'date',
       cell: info => new Date(info.getValue<string>()).toLocaleDateString(),
     },
     {
-      header: 'Description',
+      header: t('description'),
       accessorKey: 'description',
       cell: info => (
         <input
@@ -104,7 +119,7 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
     },
     {
       id: 'categories',
-      header: 'Catégories',
+      header: t('categories'),
       accessorFn: row => row.categories,
       cell: info => {
         const tx = info.row.original
@@ -126,9 +141,9 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
       },
     },
     {
-      header: 'Montant',
+      header: t('amount'),
       accessorKey: 'amount',
-      cell: info => <div className=""><ColoredAmount  amount={info.getValue<number>()} /></div>,
+      cell: info => <ColoredAmount amount={info.getValue<number>()} />,
     },
     {
       id: 'actions',
@@ -138,6 +153,7 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
             disabled={selectedIds.size === 0}
             onClick={() => onDeleteSelected?.(Array.from(selectedIds))}
             className="cursor-pointer disabled:cursor-not-allowed text-white hover:text-(--color-secondary) disabled:text-gray-300"
+            title={t('deleteSelected')}
           >
             <Trash2 size={20} />
           </button>
@@ -154,7 +170,7 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
         </div>
       ),
     },
-  ], [data, selectedIds, allCategories])
+  ], [data, selectedIds, allCategories, t])
 
   const table = useReactTable({
     data,
@@ -173,7 +189,7 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
   })
 
   const totalCredit = data.filter(t => t.type === 'credit').reduce((sum, t) => sum + t.amount, 0)
-  const totalDebit  = data.filter(t => t.type === 'debit').reduce((sum, t) => sum + t.amount, 0)
+  const totalDebit = data.filter(t => t.type === 'debit').reduce((sum, t) => sum + t.amount, 0)
 
   return (
     <div className="overflow-auto border rounded">
@@ -184,9 +200,7 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
               {hg.headers.map(header => (
                 <th
                   key={header.id}
-                  className={`cursor-pointer text-left p-2 text-xl font-medium text-white ${
-                    header.column.id === 'actions' ? 'text-right' : ''
-                  }`}
+                  className={`cursor-pointer text-left p-2 text-xl font-medium text-white ${header.column.id === 'actions' ? 'text-right' : ''}`}
                   onClick={header.column.getToggleSortingHandler()}
                 >
                   {flexRender(header.column.columnDef.header, header.getContext())}
@@ -201,10 +215,7 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
           {table.getRowModel().rows.map(row => (
             <tr key={row.id} className="border-t">
               {row.getVisibleCells().map(cell => (
-                <td
-                  key={cell.id}
-                  className={`p-2 text-lg`}
-                >
+                <td key={cell.id} className="p-2 text-lg">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
@@ -215,10 +226,16 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
           <tr>
             <td colSpan={columns.length} className="p-2 font-semibold text-white">
               <div className="flex justify-between">
-                <div>Total : {data.length} transactions</div>
+                <div>{t('totalTransactions', { count: data.length })}</div>
                 <div className="flex flex-col">
-                  <div className='flex justify-between gap-4'> <span>Débits :</span> <Amount amount={totalDebit} /></div>
-                  <div className='flex justify-between gap-4'> <span>Crédits :</span> <Amount className='self-end' amount={totalCredit} /></div>
+                  <div className="flex justify-between gap-4">
+                    <span>{t('debits')} :</span>
+                    <Amount amount={totalDebit} />
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span>{t('credits')} :</span>
+                    <Amount amount={totalCredit} />
+                  </div>
                 </div>
               </div>
             </td>
@@ -227,48 +244,30 @@ export default function TransactionTable({ data, setData, onSelectionChange, onD
             <td colSpan={columns.length} className="p-2">
               <div className="flex justify-between items-center">
                 <div className="flex gap-2">
-                  <button
-                    onClick={() => setPageIndex(0)}
-                    disabled={pageIndex === 0}
-                    className="py-1 cursor-pointer bg-transparent text-white rounded disabled:opacity-50"
-                  >
+                  <button onClick={() => setPageIndex(0)} disabled={pageIndex === 0} className="py-1 cursor-pointer bg-transparent text-white rounded disabled:opacity-50">
                     <ChevronFirst />
                   </button>
-                  <button
-                    onClick={() => setPageIndex(i => Math.max(i - 1, 0))}
-                    disabled={pageIndex === 0}
-                    className="py-1 cursor-pointer bg-transparent text-white rounded disabled:opacity-50"
-                  >
+                  <button onClick={() => setPageIndex(i => Math.max(i - 1, 0))} disabled={pageIndex === 0} className="py-1 cursor-pointer bg-transparent text-white rounded disabled:opacity-50">
                     <ChevronLeft />
                   </button>
                   {pageRange.map(n => (
                     <button
                       key={n}
                       onClick={() => setPageIndex(n)}
-                      className={`px-2 cursor-pointer text-black py-1 rounded ${
-                        pageIndex === n ? 'bg-(--color-secondary) text-white' : 'bg-white'
-                      }`}
+                      className={`px-2 cursor-pointer text-black py-1 rounded ${pageIndex === n ? 'bg-(--color-secondary) text-white' : 'bg-white'}`}
                     >
                       {n + 1}
                     </button>
                   ))}
-                  <button
-                    onClick={() => setPageIndex(i => Math.min(i + 1, totalPages - 1))}
-                    disabled={pageIndex >= totalPages - 1}
-                    className="py-1 cursor-pointer bg-transparent text-white rounded disabled:opacity-50"
-                  >
+                  <button onClick={() => setPageIndex(i => Math.min(i + 1, totalPages - 1))} disabled={pageIndex >= totalPages - 1} className="py-1 cursor-pointer bg-transparent text-white rounded disabled:opacity-50">
                     <ChevronRight />
                   </button>
-                  <button
-                    onClick={() => setPageIndex(totalPages - 1)}
-                    disabled={pageIndex >= totalPages - 1}
-                    className="py-1 cursor-pointer bg-transparent text-white rounded disabled:opacity-50"
-                  >
+                  <button onClick={() => setPageIndex(totalPages - 1)} disabled={pageIndex >= totalPages - 1} className="py-1 cursor-pointer bg-transparent text-white rounded disabled:opacity-50">
                     <ChevronLast />
                   </button>
                 </div>
                 <div className="flex items-center gap-2 text-white">
-                  <span className="text-sm">Lignes/page :</span>
+                  <span className="text-sm">{t('rowsPerPage')} :</span>
                   <input
                     type="number"
                     min={1}

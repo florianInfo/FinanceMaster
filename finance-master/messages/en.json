@@ -59,6 +59,7 @@
     "description": "Description",
     "categories": "Categories",
     "amount": "Amount",
+    "addCategories": "Add categories",
     "deleteSelected": "Delete selected",
     "totalTransactions": "Total: {count} transactions",
     "debits": "Debits",
@@ -68,6 +69,11 @@
   "CategoryAdd": {
     "placeholder": "Add categories...",
     "apply": "Apply"
+  },
+  "CategoryAddPopup": {
+    "title": "Add categories",
+    "message": "Apply the change to the transaction of {date} - {description}",
+    "cancel": "Cancel"
   },
   "Snackbar": {
     "undo": "Undo"

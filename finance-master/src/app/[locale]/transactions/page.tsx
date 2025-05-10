@@ -11,6 +11,7 @@ import { ModalConfigButton } from '@/types/ModalConfigButton';
 import { RotateCcw } from 'lucide-react';
 import { Snackbar } from '@/components/Snackbar';
 import CategoryAddComponent from '@/components/CategoryAddComponent';
+import CategoryAddPopup from '@/components/CategoryAddPopup';
 
 export default function TransactionsPage() {
   const t = useTranslations('Transactions');
@@ -36,6 +37,9 @@ export default function TransactionsPage() {
   const [modalButtons, setModalButtons] = useState<ModalConfigButton[]>([]);
   const [idsToDelete, setIdsToDelete] = useState<string[]>([]);
   const [idsSelected, setIdsSelected] = useState<string[]>([]);
+  const [showAddCategoryPopup, setShowAddCategoryPopup] = useState(false);
+  const [targetTransactionId, setTargetTransactionId] = useState<string | null>(null);
+
 
   useEffect(() => {
     const filtered = filterData(transactions);
@@ -58,11 +62,13 @@ export default function TransactionsPage() {
     setFilters(newFilters);
   }, []);
 
-  const handleAddCategory = (categoriesId: string[]) => {
-    if (idsSelected.length > 1) {
+  /** ADD Categories */
+  const handleAddCategory = (categoriesId: string[], transactionIds: string[] | null) => {
+    if(!transactionIds) return
+    if (transactionIds.length > 1) {
       applyCategoriesToTransactions(idsSelected, categoriesId);
     } else {
-      const baseTransaction = transactions.find(tx => tx.id === idsSelected[0]);
+      const baseTransaction = transactions.find(tx => tx.id === transactionIds[0]);
       if (!baseTransaction) return;
 
       const similarTransactions = findSimilarTransactions(baseTransaction).filter((tx: Transaction) =>
@@ -78,12 +84,12 @@ export default function TransactionsPage() {
           [
             {
               label: t('yes'),
-              onClick: () => applyCategoriesToTransactions([...idsSelected, ...similarTransactions.map(tx => tx.id)], categoriesId),
+              onClick: () => applyCategoriesToTransactions([...transactionIds, ...similarTransactions.map(tx => tx.id)], categoriesId),
               variant: 'primary'
             },
             {
               label: t('no'),
-              onClick: () => applyCategoriesToTransactions(idsSelected, categoriesId),
+              onClick: () => applyCategoriesToTransactions(transactionIds, categoriesId),
               variant: 'secondary'
             },
             {
@@ -94,7 +100,7 @@ export default function TransactionsPage() {
           ]
         );
       } else {
-        applyCategoriesToTransactions(idsSelected, categoriesId);
+        applyCategoriesToTransactions(transactionIds, categoriesId);
       }
     }
   };
@@ -112,6 +118,7 @@ export default function TransactionsPage() {
       return tx;
     });
     setTransactions(updatedTransactions);
+    setShowAddCategoryPopup(false)
     createUndo(t('categoriesAdded'), () => {
       setTransactions(prev =>
         prev.map(tx => {
@@ -153,25 +160,31 @@ export default function TransactionsPage() {
     setHasTemporaryDeletions(true);
   };
 
-  const handleRemoveCategory = (selectedIds: string[], transactionId: string, categoryId: string) => {
-    const baseTransaction = transactions.find(tx => tx.id === transactionId);
-    if (!baseTransaction) return;
-
-    const similar = findSimilarTransactions(baseTransaction).filter((tx: Transaction) =>
-      tx.categories.includes(categoryId)
-    );
-
-    if (similar.length > 0) {
-      openConfirmationModal(
-        t('confirmRemoveAllTitle'),
-        t('confirmRemoveAllMessage', { count: similar.length }),
-        [
-          { label: t('yes'), onClick: () => removeCategoryFromMultiple([transactionId, ...similar.map(tx => tx.id)], categoryId), variant: 'primary' },
-          { label: t('no'), onClick: () => removeCategoryFromOne(transactionId, categoryId), variant: 'secondary' }
-        ]
-      );
+  const handleRemoveCategory = (txSelectedIds: string[], txId: string, categoryId: string) => {
+    if(!txSelectedIds) return
+    if(!txSelectedIds.includes(txId)) txSelectedIds = [txId]
+    if (txSelectedIds.length > 1 ) {
+      removeCategoryFromMultiple(txSelectedIds, categoryId);
     } else {
-      removeCategoryFromOne(transactionId, categoryId);
+      const baseTransaction = transactions.find(tx => tx.id === txSelectedIds[0]);
+      if (!baseTransaction) return;
+
+      const similar = findSimilarTransactions(baseTransaction).filter((tx: Transaction) =>
+        tx.categories.includes(categoryId)
+      );
+
+      if (similar.length > 0) {
+        openConfirmationModal(
+          t('confirmRemoveAllTitle'),
+          t('confirmRemoveAllMessage', { count: similar.length }),
+          [
+            { label: t('yes'), onClick: () => removeCategoryFromMultiple([txSelectedIds[0], ...similar.map(tx => tx.id)], categoryId), variant: 'primary' },
+            { label: t('no'), onClick: () => removeCategoryFromOne(txSelectedIds[0], categoryId), variant: 'secondary' }
+          ]
+        );
+      } else {
+        removeCategoryFromOne(txSelectedIds[0], categoryId);
+      }
     }
   };
 
@@ -235,6 +248,20 @@ export default function TransactionsPage() {
     setShowConfirmModal(true);
   };
 
+  
+  const handleAddCategoryPopup = (categoriesId: string[]) =>{
+    handleAddCategory(categoriesId, [targetTransactionId])
+  }
+
+  const handleAddCategoryComponent = (categoriesId: string[]) =>{
+    handleAddCategory(categoriesId, [...idsSelected])
+  }
+
+  const openCategoryPopup = (id: string) => {
+    setTargetTransactionId(id)
+    setShowAddCategoryPopup(true);
+  };
+
   const handleRefreshData = () => {
     setTableData(filterData(transactions));
     setHasTemporaryDeletions(false);
@@ -270,12 +297,13 @@ export default function TransactionsPage() {
         </div>
       )}
 
-      {idsSelected.length > 0 && (
+     
         <CategoryAddComponent
           categories={categories}
-          onAddCategory={handleAddCategory}
+          onAddCategory={handleAddCategoryComponent}
+          disabled={idsSelected.length <= 0}
+          refreshOnApply={true}
         />
-      )}
 
       <TransactionTable
         data={tableData}
@@ -283,6 +311,18 @@ export default function TransactionsPage() {
         onSelectionChange={setIdsSelected}
         onDeleteSelected={handleDeleteRequest}
         onRemoveCategory={handleRemoveCategory}
+        onAddCategoriesClick={openCategoryPopup}
+      />
+
+      <CategoryAddPopup
+        isOpen={showAddCategoryPopup}
+        onClose={() => {
+          setShowAddCategoryPopup(false)
+          setIdsSelected([])
+        }}
+        onAdd={handleAddCategoryPopup}
+        categories={categories}
+        transaction={transactions.find(tx => tx.id == targetTransactionId)}
       />
 
       <ConfirmModal

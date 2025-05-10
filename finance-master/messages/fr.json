@@ -28,7 +28,7 @@
   },
   "Transactions": {
     "title": "Mes Transactions",
-    "confirmApplyToAllTitle": "Appliquer la catégorie à toutes les transactions similaires ?",
+    "confirmApplyToAllTitle": "Appliquer partout ?",
     "confirmApplyToAllMessage": "{count} transactions similaires ont été trouvées. Voulez-vous appliquer la catégorie à toutes ces transactions ?",
     "categoriesAdded": "Catégories ajoutées.",
     "deleteTitle": "Suppression",
@@ -59,6 +59,7 @@
     "description": "Description",
     "categories": "Catégories",
     "amount": "Montant",
+    "addCategories": "Ajouter des catégories",
     "deleteSelected": "Supprimer la sélection",
     "totalTransactions": "Total : {count} transactions",
     "debits": "Débits",
@@ -68,6 +69,11 @@
   "CategoryAdd": {
     "placeholder": "Ajouter des catégories...",
     "apply": "Appliquer"
+  },
+  "CategoryAddPopup": {
+    "title": "Ajouter catégories",
+    "message": "Appliquer le changement à la transaction du {date} - {description}",
+    "cancel": "Annuler"
   },
   "Snackbar": {
     "undo": "Annuler"

@@ -16,6 +16,7 @@ import {
   ChevronFirst,
   ChevronLast,
   Trash2,
+  Plus
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useTransactions } from '@/contexts/TransactionsContext'
@@ -31,7 +32,8 @@ interface Props {
   setData: (newData: Transaction[]) => void
   onSelectionChange?: (selectedIds: string[]) => void
   onDeleteSelected?: (ids: string[]) => void
-  onRemoveCategory?: (ids: string[], transactionId: string, categoryId: string) => void
+  onRemoveCategory?: (txSelectedIds: string[], txId: string, categoryId: string) => void
+  onAddCategoriesClick?: (id: string) => void
 }
 
 export default function TransactionTable({
@@ -40,6 +42,7 @@ export default function TransactionTable({
   onSelectionChange,
   onDeleteSelected,
   onRemoveCategory,
+  onAddCategoriesClick
 }: Props) {
   const { categories: allCategories } = useTransactions()
   const t = useTranslations('TransactionTable')
@@ -61,6 +64,7 @@ export default function TransactionTable({
   }, [data, pageSize])
 
   const toggleRowSelection = (id: string) => {
+    console.log(id)
     setSelectedIds(prev => {
       const copy = new Set(prev)
       copy.has(id) ? copy.delete(id) : copy.add(id)
@@ -122,13 +126,13 @@ export default function TransactionTable({
       header: t('categories'),
       accessorFn: row => row.categories,
       cell: info => {
-        const tx = info.row.original
+        const tx = info.row.original;
         const opts: CategoryOption[] = tx.categories
           .map(txCat => allCategories.find(catOpt => catOpt.value === txCat))
-          .filter((c): c is CategoryOption => !!c)
-
+          .filter((c): c is CategoryOption => !!c);
+    
         return (
-          <div className="flex flex-wrap w-80">
+          <div className="flex flex-wrap items-center gap-1 w-80">
             {opts.map(cat => (
               <CategoryTag
                 key={cat.value}
@@ -136,8 +140,15 @@ export default function TransactionTable({
                 onRemove={() => onRemoveCategory?.(Array.from(selectedIds), tx.id, cat.value)}
               />
             ))}
+            <button
+              onClick={() => onAddCategoriesClick?.(tx.id)}
+              className={`cursor-pointer text-(--color-text) hover:text-(--color-secondary)`}
+              title={t('addCategories')}
+            >
+              <Plus size={14} />
+            </button>
           </div>
-        )
+        );
       },
     },
     {

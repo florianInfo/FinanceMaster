@@ -8,15 +8,24 @@ import { CategoryOption } from '@/types/CategoryOption';
 interface CategoryAddComponentProps {
   categories: CategoryOption[];
   onAddCategory: (categoryIds: string[]) => void;
+  disabled: boolean;
+  refreshOnApply: boolean
 }
 
 const CategoryAddComponent: React.FC<CategoryAddComponentProps> = ({
   categories,
   onAddCategory,
+  disabled,
+  refreshOnApply
 }) => {
   const t = useTranslations('CategoryAdd');
   const [selectedOptions, setSelectedOptions] = useState<CategoryOption[]>([]);
   const [options, setOptions] = useState<CategoryOption[]>([]);
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   useEffect(() => {
     setOptions(categories);
@@ -35,12 +44,15 @@ const CategoryAddComponent: React.FC<CategoryAddComponentProps> = ({
   const handleApply = () => {
     const categoryIds = selectedOptions.map((opt) => opt.value);
     onAddCategory(categoryIds);
-    setSelectedOptions([]);
+    if(refreshOnApply) {
+      setSelectedOptions([])
+    }
   };
 
   return (
     <div className="flex items-center justify-between bg-white p-4 rounded shadow mb-4">
       <div className="flex-1 mr-4">
+      {isMounted &&
         <CreatableSelect
           isMulti
           options={options}
@@ -79,12 +91,13 @@ const CategoryAddComponent: React.FC<CategoryAddComponentProps> = ({
             }),
           }}
         />
+      }
       </div>
       <button
         onClick={handleApply}
-        disabled={selectedOptions.length === 0}
+        disabled={disabled || selectedOptions.length === 0}
         className={`px-4 py-2 rounded ${
-          selectedOptions.length === 0
+          disabled || selectedOptions.length === 0
             ? 'bg-(--color-muted) text-white cursor-not-allowed'
             : 'bg-(--color-primary) text-white cursor-pointer hover:bg-(--color-secondary)'
         }`}

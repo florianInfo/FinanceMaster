@@ -47,7 +47,7 @@ export default function BalanceChartWrapper({ transactions }: Props) {
       ...prev,
       id: revenueCategory || 'revenu',
       label: updated?.label || revenueCategory || 'revenu',
-      color: updated?.color || '#F59E0B',
+      color: '#F59E0B',
     }))
   }, [revenueCategory, categories])
 
@@ -66,7 +66,7 @@ export default function BalanceChartWrapper({ transactions }: Props) {
       {
         id: 'balance',
         label: 'Balance',
-        color: '#10B981', // emerald-500
+        color: '#22c55e', // emerald-500
         visible: true,
         aggregation: 'total',
         editable: false,

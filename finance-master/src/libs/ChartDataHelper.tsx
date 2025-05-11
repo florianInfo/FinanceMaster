@@ -88,7 +88,7 @@ export function computeAggregatedChartData(
     p.balance = p.revenue + p.expense
 
     for (const cat of tx.categories) {
-      p.categories[cat] = (p.categories[cat] || 0) - amount
+      p.categories[cat] = (p.categories[cat] || 0) + Math.abs(amount)
     }
 
     p.solde = runningSolde

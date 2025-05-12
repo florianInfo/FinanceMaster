@@ -89,3 +89,7 @@ h1 {
 button{
   font-family: var(--text-font-regular);
 }
+
+.react-select__menu {
+  z-index: 9999 !important;
+}

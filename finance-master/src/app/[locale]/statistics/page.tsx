@@ -13,8 +13,8 @@ export default function AnalyticsPage() {
   }, [transactions])
 
   return (
-    <main className="p-6 space-y-6">
-      <h1 className="text-xl font-bold">📈 Analyse Financière</h1>
+    <main className="p-4 space-y-6">
+      <h1 className="text-xl font-bold">Analyse Financière</h1>
 
       {/* 🧪 Futur panneau de filtres */}
       {/* <FilterPanel onChange={...} /> */}

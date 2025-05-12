@@ -8,6 +8,7 @@ export const SUPPORTED_CURRENCIES: Currency[] = ['EUR', 'USD', 'CAD'];
 interface CurrencyContextType {
   currency: Currency;
   setCurrency: (currency: Currency) => void;
+  getCurrencySymbol: () => string;
 }
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
@@ -33,8 +34,17 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     setCurrencyState(newCurrency);
   };
 
+  const getCurrencySymbol = () => {
+    switch (currency) {
+      case 'EUR': return '€';
+      case 'USD': return '$';
+      case 'CAD': return 'CA$';
+      default: return currency;
+    }
+  }
+
   return (
-    <CurrencyContext.Provider value={{ currency, setCurrency }}>
+    <CurrencyContext.Provider value={{ currency, setCurrency, getCurrencySymbol }}>
       {children}
     </CurrencyContext.Provider>
   );

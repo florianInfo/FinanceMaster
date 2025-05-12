@@ -6,7 +6,7 @@ interface Props {
 }
 
 export default function Amount({ amount, className = '' }: Props) {
-  const { currency } = useCurrency();
+  const { getCurrencySymbol } = useCurrency();
 
   const formatAmount = (value: number): string => {
     return value.toLocaleString('fr-FR', {
@@ -15,20 +15,11 @@ export default function Amount({ amount, className = '' }: Props) {
     });
   };
 
-  const getSymbol = (currency: string) => {
-    switch (currency) {
-      case 'EUR': return '€';
-      case 'USD': return '$';
-      case 'CAD': return 'CA$';
-      default: return currency;
-    }
-  };
-
   const sign = amount < 0 ? '-' : amount > 0 ? '+' : '';
 
   return (
     <span className={`whitespace-nowrap ${className}`}>
-      {sign} {formatAmount(Math.abs(amount))} {getSymbol(currency)}
+      {sign} {formatAmount(Math.abs(amount))} {getCurrencySymbol()}
     </span>
   );
 }

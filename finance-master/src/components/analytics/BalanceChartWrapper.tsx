@@ -12,6 +12,7 @@ import { computeAggregatedChartData } from '@/libs/ChartDataHelper'
 import { AggregationMode, CurveConfig, GraphView } from '@/types/CurveConfig'
 import { useLocale } from 'next-intl'
 import { motion } from 'framer-motion'
+import '../../styles/globals.css'
 
 interface Props {
   transactions: Transaction[]
@@ -58,7 +59,7 @@ export default function BalanceChartWrapper({ transactions }: Props) {
       {
         id: 'solde',
         label: 'Solde',
-        color: '#4B5563', // gray-700
+        color: 'var(--color-text)', // gray-700
         visible: true,
         aggregation: 'min',
         editable: false,
@@ -66,7 +67,7 @@ export default function BalanceChartWrapper({ transactions }: Props) {
       {
         id: 'balance',
         label: 'Balance',
-        color: '#22c55e', // emerald-500
+        color: '#22c55e',
         visible: true,
         aggregation: 'total',
         editable: false,
@@ -104,10 +105,10 @@ export default function BalanceChartWrapper({ transactions }: Props) {
   const reactSelectOptions = categories.map(cat => ({ value: cat.value, label: cat.label }))
 
   return (
-    <section className="flex gap-6">
-      <aside className="w-48 shrink-0 space-y-2 overflow-y-auto max-h-[400px] pr-2">
+    <section className="flex gap-4">
+       <aside className="w-58 shrink-0 space-y-2 pr-2 max-h-[400px] overflow-auto">
         {allCurves.map(curve => (
-          <div key={curve.id} className="flex items-center gap-2 border-b pb-2 mb-2">
+          <div key={curve.id} className="flex items-center gap-2 border-b pb-2">
             <span
               className="inline-block w-3 h-3 rounded-full"
               style={{ backgroundColor: curve.id === revenueCurve.id
@@ -118,17 +119,66 @@ export default function BalanceChartWrapper({ transactions }: Props) {
             {curve.id === revenueCurve.id ? (
               <div className="flex-1">
                 {mounted && <Select
-                  className="text-xs"
+                  className="text-xs mb-2"
                   options={reactSelectOptions}
                   value={{ value: revenueCategory, label: revenueCatOpt?.label || revenueCategory || 'revenu' }}
                   onChange={(selected) => selected && setRevenueCategory(selected.value)}
                   isSearchable
+                  menuPortalTarget={document.body}
                   styles={{
-                    control: (base) => ({ ...base, minHeight: '1.5rem', fontSize: '0.75rem' }),
-                    indicatorsContainer: (base) => ({ ...base, height: '1.5rem' }),
-                    valueContainer: (base) => ({ ...base, padding: '0 0.25rem' }),
-                    dropdownIndicator: (base) => ({ ...base, padding: '0 0.25rem' }),
+                    control: (base, state) => ({
+                      ...base,
+                      minHeight: '1.5rem',
+                      fontSize: '0.75rem',
+                      padding: '2px',
+                      background: 'var(--color-bg)',
+                      color: 'var(--color-text)',
+                      borderColor: state.isFocused ? 'var(--color-primary)' : 'var(--color-text)',
+                      boxShadow: state.isFocused ? '0 0 0 1px var(--color-primary)' : 'none',
+                      '&:hover': { borderColor: 'var(--color-primary)' },
+                    }),
+                    menuPortal: base => ({
+                      ...base,
+                      zIndex: 9999,
+                    }),
+                    singleValue: (base) => ({
+                      ...base,
+                      color: 'var(--color-text)',
+                    }),
+                    input: (base) => ({
+                      ...base,
+                      color: 'var(--color-text)',
+                    }),
+                    placeholder: (base) => ({
+                      ...base,
+                      color: 'var(--color-text)',
+                    }),
+                    menu: (base) => ({
+                      ...base,
+                      backgroundColor: 'var(--color-bg)',
+                      color: 'var(--color-text)',
+                    }),
+                    option: (base, state) => ({
+                      ...base,
+                      backgroundColor: state.isFocused ? 'rgba(0,0,0,0.05)' : 'var(--color-bg)',
+                      color: 'var(--color-text)',
+                      cursor: 'pointer',
+                    }),
+                    indicatorsContainer: (base) => ({
+                      ...base,
+                      height: '1.5rem',
+                    }),
+                    valueContainer: (base) => ({
+                      ...base,
+                      padding: '0 0.25rem',
+                    }),
+                    dropdownIndicator: (base) => ({
+                      ...base,
+                      padding: '0 0.25rem',
+                      color: 'var(--color-text)',
+                    }),
                   }}
+                  
                 />
                 }</div>
             ) : curve.editable ? (
@@ -141,6 +191,11 @@ export default function BalanceChartWrapper({ transactions }: Props) {
                     if (!selected) return
                     const cat = categories.find(c => c.value === selected.value)
                     if (!cat) return
+                  
+                    // Vérifie si la catégorie est déjà utilisée par une autre courbe
+                    const alreadyUsed = curves.some(c => c.id === cat.value)
+                    if (alreadyUsed) return
+                  
                     setCurves(prev =>
                       prev.map(c =>
                         c.id === curve.id
@@ -149,21 +204,66 @@ export default function BalanceChartWrapper({ transactions }: Props) {
                       )
                     )
                   }}
+                  
                   isSearchable
                   styles={{
-                    control: (base) => ({ ...base, minHeight: '1.5rem', fontSize: '0.75rem' }),
-                    indicatorsContainer: (base) => ({ ...base, height: '1.5rem' }),
-                    valueContainer: (base) => ({ ...base, padding: '0 0.25rem' }),
-                    dropdownIndicator: (base) => ({ ...base, padding: '0 0.25rem' }),
+                    control: (base, state) => ({
+                      ...base,
+                      minHeight: '1.5rem',
+                      fontSize: '0.75rem',
+                      padding: '2px',
+                      background: 'var(--color-bg)',
+                      color: 'var(--color-text)',
+                      borderColor: state.isFocused ? 'var(--color-primary)' : 'var(--color-text)',
+                      boxShadow: state.isFocused ? '0 0 0 1px var(--color-primary)' : 'none',
+                      '&:hover': { borderColor: 'var(--color-primary)' },
+                    }),
+                    singleValue: (base) => ({
+                      ...base,
+                      color: 'var(--color-text)',
+                    }),
+                    input: (base) => ({
+                      ...base,
+                      color: 'var(--color-text)',
+                    }),
+                    placeholder: (base) => ({
+                      ...base,
+                      color: 'var(--color-text)',
+                    }),
+                    menu: (base) => ({
+                      ...base,
+                      backgroundColor: 'var(--color-bg)',
+                      color: 'var(--color-text)',
+                    }),
+                    option: (base, state) => ({
+                      ...base,
+                      backgroundColor: state.isFocused ? 'rgba(0,0,0,0.05)' : 'var(--color-bg)',
+                      color: 'var(--color-text)',
+                      cursor: 'pointer',
+                    }),
+                    indicatorsContainer: (base) => ({
+                      ...base,
+                      height: '1.5rem',
+                    }),
+                    valueContainer: (base) => ({
+                      ...base,
+                      padding: '0 0.25rem',
+                    }),
+                    dropdownIndicator: (base) => ({
+                      ...base,
+                      padding: '0 0.25rem',
+                      color: 'var(--color-text)',
+                    }),
                   }}
+                  
                 />
                 }</div>
             ) : (
-              <span className="text-xs text-gray-700">{curve.label}</span>
+              <span className="text-xs text-(--color-text)">{curve.label}</span>
             )}
 
             <button
-              className="text-gray-500 hover:text-black"
+              className="text-gray-500 hover:text-(--color-text) cursor-pointer"
               onClick={() => toggleCurveVisibility(curve.id)}
             >
               {((curve.id === revenueCurve.id && revenueCurveVisible) ||
@@ -174,9 +274,9 @@ export default function BalanceChartWrapper({ transactions }: Props) {
               )}
             </button>
 
-            {curve.editable && curve.id !== revenueCurve.id && (
+            {curve.editable && (
               <button
-                className="text-red-500 hover:text-red-700"
+                className={`text-red-500 hover:text-red-700 ${curve.id == revenueCurve.id ? 'invisible': 'cursor-pointer'}`}
                 onClick={() => setCurves(prev => prev.filter(c => c.id !== curve.id))}
               >
                 <X className="w-4 h-4" />
@@ -188,7 +288,7 @@ export default function BalanceChartWrapper({ transactions }: Props) {
         {/* ➕ Ajouter une catégorie */}
         <div className="mt-2">
           <button
-            className="w-full text-xs px-2 py-1 rounded border border-dashed border-gray-400 text-gray-600 hover:bg-gray-100"
+            className="w-full cursor-pointer text-xs px-2 py-1 rounded border border-dashed border-gray-400 text-(--color-text) hover:bg-(--color-secondary) hover:text-white"
             onClick={() => {
               const existingIds = new Set([...curves.map(c => c.id), revenueCurve.id])
               const next = categories.find(c => !existingIds.has(c.value))

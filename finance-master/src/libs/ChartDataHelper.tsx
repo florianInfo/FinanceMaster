@@ -65,7 +65,7 @@ export function computeAggregatedChartData(
         ? date.getFullYear().toString()
         : view === 'month'
         ? monthYearFormatter.format(date)
-        : dayKey.slice(5)
+        : dayKey
 
     if (!points.has(key)) {
       points.set(key, {

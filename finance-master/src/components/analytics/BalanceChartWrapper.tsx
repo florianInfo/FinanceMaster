@@ -21,6 +21,7 @@ interface Props {
 export default function BalanceChartWrapper({ transactions }: Props) {
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
+  const locale = useLocale()
 
   const {
     categories,
@@ -30,7 +31,6 @@ export default function BalanceChartWrapper({ transactions }: Props) {
     setInitialBalance
   } = useTransactions()
 
-  const locale = useLocale()
   const revenueCatOpt = categories.find(c => c.value === revenueCategory)
 
   const [revenueCurveVisible, setRevenueCurveVisible] = useState(true)
@@ -59,7 +59,7 @@ export default function BalanceChartWrapper({ transactions }: Props) {
       {
         id: 'solde',
         label: 'Solde',
-        color: 'var(--color-text)', // gray-700
+        color: 'var(--color-text)',
         visible: true,
         aggregation: 'min',
         editable: false,
@@ -102,11 +102,9 @@ export default function BalanceChartWrapper({ transactions }: Props) {
     )
   }, [transactions, curves, revenueCurve, revenueCurveVisible, view, revenueCategory, initialBalance])
 
-  const reactSelectOptions = categories.map(cat => ({ value: cat.value, label: cat.label }))
-
   return (
     <section className="flex gap-4">
-       <aside className="w-58 shrink-0 space-y-2 pr-2 max-h-[400px] overflow-auto">
+       <aside className="w-58 shrink-0 space-y-2 pr-2 max-h-[400px] overflow-auto relative z-10">
         {allCurves.map(curve => (
           <div key={curve.id} className="flex items-center gap-2 border-b pb-2">
             <span
@@ -120,11 +118,11 @@ export default function BalanceChartWrapper({ transactions }: Props) {
               <div className="flex-1">
                 {mounted && <Select
                   className="text-xs mb-2"
-                  options={reactSelectOptions}
+                  options={categories}
                   value={{ value: revenueCategory, label: revenueCatOpt?.label || revenueCategory || 'revenu' }}
                   onChange={(selected) => selected && setRevenueCategory(selected.value)}
                   isSearchable
-                  menuPortalTarget={document.body}
+                  menuPortalTarget={typeof window !== 'undefined' ? document.body : null}
                   styles={{
                     control: (base, state) => ({
                       ...base,
@@ -182,20 +180,16 @@ export default function BalanceChartWrapper({ transactions }: Props) {
                 />
                 }</div>
             ) : curve.editable ? (
-              <div className="flex-1">
-                {mounted && <Select
+              <div className="flex-1 z-50 relative">
+              {mounted && (
+                <Select
                   className="text-xs"
-                  options={reactSelectOptions}
-                  value={reactSelectOptions.find(opt => opt.value === curve.id) || null}
+                  options={categories.filter(cat => !curves.map(curve => curve.id).includes(cat.value))}
+                  value={categories.find(opt => opt.value === curve.id) || null}
                   onChange={(selected) => {
                     if (!selected) return
                     const cat = categories.find(c => c.value === selected.value)
                     if (!cat) return
-                  
-                    // Vérifie si la catégorie est déjà utilisée par une autre courbe
-                    const alreadyUsed = curves.some(c => c.id === cat.value)
-                    if (alreadyUsed) return
-                  
                     setCurves(prev =>
                       prev.map(c =>
                         c.id === curve.id
@@ -204,9 +198,12 @@ export default function BalanceChartWrapper({ transactions }: Props) {
                       )
                     )
                   }}
-                  
                   isSearchable
+                  menuPortalTarget={typeof window !== 'undefined' ? document.body : null}
+                  menuPlacement="auto"
+                  menuPosition="fixed"
                   styles={{
+                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
                     control: (base, state) => ({
                       ...base,
                       minHeight: '1.5rem',
@@ -234,6 +231,7 @@ export default function BalanceChartWrapper({ transactions }: Props) {
                       ...base,
                       backgroundColor: 'var(--color-bg)',
                       color: 'var(--color-text)',
+                      zIndex: 50
                     }),
                     option: (base, state) => ({
                       ...base,
@@ -255,9 +253,9 @@ export default function BalanceChartWrapper({ transactions }: Props) {
                       color: 'var(--color-text)',
                     }),
                   }}
-                  
                 />
-                }</div>
+              )}
+            </div>
             ) : (
               <span className="text-xs text-(--color-text)">{curve.label}</span>
             )}

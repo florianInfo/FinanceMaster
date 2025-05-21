@@ -1,5 +1,3 @@
-import { getRequestConfig } from 'next-intl/server';
-import { getTranslations } from 'next-intl/server';
 import type { Transaction } from '@/types/Transaction'
 import type { CurveConfig, GraphView } from '@/types/CurveConfig'
 

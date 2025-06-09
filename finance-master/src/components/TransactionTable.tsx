@@ -26,6 +26,9 @@ import { CategoryTag } from './CategoryTag'
 import Amount from './Amount'
 import ColoredAmount from './ColoredAmount'
 import '@/styles/globals.css'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+dayjs.extend(utc)
 
 interface Props {
   data: Transaction[]
@@ -102,7 +105,7 @@ export default function TransactionTable({
     {
       header: t('date'),
       accessorKey: 'date',
-      cell: info => new Date(info.getValue<string>()).toLocaleDateString(),
+      cell: info => dayjs.utc(info.getValue<string>()).format("YYYY-MM-DD"),
     },
     {
       header: t('description'),

@@ -1,6 +1,7 @@
 'use client'
 import { Charge } from '@/libs/ForecastHelper'
 import { useTransactions } from '@/contexts/TransactionsContext'
+import dayjs from 'dayjs'
 
 interface Props {
   charges: Charge[]
@@ -15,6 +16,7 @@ export default function ChargeList({ charges }: Props) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {charges.map((charge, i) => {
+        if(charge.amount == 0) return
         const isCredit = charge.type === 'credit'
         const colorClass = isCredit ? 'text-green-600' : 'text-red-600'
         const displayAmount = `${isCredit ? '+' : ''}${charge.amount.toFixed(2)} $`
@@ -32,16 +34,16 @@ export default function ChargeList({ charges }: Props) {
               {charge.category}
             </div>
 
-            <div className="text-sm italic text-center mb-1">{charge.frequency}</div>
+            <div className="text-sm italic text-center mb-1">{charge.frequency} - {dayjs(charge.startDate).format('YYYY-MM-DD')}</div>
             <div className={`text-center text-xl font-bold mb-2 ${colorClass}`}>
               {displayAmount}
             </div>
 
             <details className="text-sm text-muted-foreground mt-2">
-              <summary className="cursor-pointer text-xs underline text-center">Valeurs</summary>
+              <summary className="cursor-pointer text-xs underline text-center">Valeurs ({charge.transactions.length})</summary>
               <ul className="mt-1 max-h-32 overflow-y-auto text-center">
                 {charge.transactions.map((v, i) => (
-                  <li key={i}>{v.amount.toFixed(2)} {v.description} {v.date.slice(0, 10)}</li>
+                  <li key={i}>{v.id}-{v.amount.toFixed(2)} {v.description} {v.date.slice(0, 10)}</li>
                 ))}
               </ul>
             </details>

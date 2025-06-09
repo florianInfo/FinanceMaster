@@ -25,7 +25,7 @@ export function parseCsvToTransactions(csvContent: string, lastId: number): Tran
 
     return {
       id: `${lastId + index + 1}`, // <- ID auto-incrémenté
-      date: new Date(rawDate).toISOString(),
+      date: new Date(rawDate).toISOString().slice(0, 10),
       description: rawDesc.trim(),
       categories: rawCategory.split(',').map((c: string) => c.trim()).filter(Boolean),
       amount,

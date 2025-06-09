@@ -1,5 +1,8 @@
+import dayjs from 'dayjs'
 import type { Transaction } from '@/types/Transaction'
 import type { CurveConfig, GraphView } from '@/types/CurveConfig'
+import utc from 'dayjs/plugin/utc'
+dayjs.extend(utc)
 
 export interface Dataset {
   id: string
@@ -25,14 +28,14 @@ export function computeAggregatedChartData(
   if (transactions.length === 0) return { labels: [], datasets: [] }
 
   const sorted = [...transactions].sort((a, b) =>
-    new Date(a.date).getTime() - new Date(b.date).getTime()
+    dayjs(a.date).isBefore(dayjs(b.date)) ? -1 : 1
   )
 
   const monthYearFormatter = new Intl.DateTimeFormat(locale, { month: 'short', year: 'numeric' })
 
   const points: Map<string, {
     label: string
-    date: Date
+    date: dayjs.Dayjs
     solde: number
     revenue: number
     expense: number
@@ -43,9 +46,8 @@ export function computeAggregatedChartData(
   let runningSolde = initialBalance ?? 0
 
   for (const tx of sorted) {
-    const date = new Date(tx.date)
-    const dayKey = date.toISOString().slice(0, 10)
-
+    const date = dayjs(tx.date.replace(/Z$/, '')) // force le parsing en local
+    const dayKey = date.format('YYYY-MM-DD')
     const isRevenue = tx.categories.includes(revenueCategory)
     const amount = tx.amount
 
@@ -53,18 +55,18 @@ export function computeAggregatedChartData(
 
     const key =
       view === 'year'
-        ? date.getFullYear().toString()
+        ? date.format('YYYY')
         : view === 'month'
-        ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+        ? date.format('YYYY-MM')
         : dayKey
 
     const label =
       view === 'year'
-        ? date.getFullYear().toString()
+        ? date.format('YYYY')
         : view === 'month'
-        ? monthYearFormatter.format(date)
+        ? new Intl.DateTimeFormat(locale, { month: 'short', year: 'numeric' }).format(date.toDate()) // formatter natif
         : dayKey
-
+        
     if (!points.has(key)) {
       points.set(key, {
         label,
@@ -117,8 +119,7 @@ export function computeAggregatedChartData(
       let val = 0
       switch (curve.id) {
         case 'solde':
-          const allS = values.map(v => v.solde)
-          val = Math.min(...allS)
+          val = Math.min(...values.map(v => v.solde))
           break
         case 'balance':
           val = values.reduce((acc, v) => acc + v.balance, 0)

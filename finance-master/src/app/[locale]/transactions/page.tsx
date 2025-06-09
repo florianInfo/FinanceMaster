@@ -12,6 +12,7 @@ import { RotateCcw } from 'lucide-react';
 import { Snackbar } from '@/components/Snackbar';
 import CategoryAddComponent from '@/components/CategoryAddComponent';
 import CategoryAddPopup from '@/components/CategoryAddPopup';
+import dayjs from 'dayjs';
 
 export default function TransactionsPage() {
   const t = useTranslations('Transactions');
@@ -48,16 +49,29 @@ export default function TransactionsPage() {
 
   const filterData = (transactions: Transaction[]) => {
     return transactions.filter((tx) => {
-      if (filters.startDate && new Date(tx.date) < new Date(filters.startDate)) return false;
-      if (filters.endDate && new Date(tx.date) > new Date(filters.endDate)) return false;
-      if (filters.categories.length > 0 && !filters.categories.some(cat => tx.categories.includes(cat))) return false;
-      if (filters.description && !tx.description.toLowerCase().includes(filters.description.toLowerCase())) return false;
-      if (filters.minAmount !== '' && tx.amount < (filters.minAmount as number)) return false;
-      if (filters.maxAmount !== '' && tx.amount > (filters.maxAmount as number)) return false;
-      return true;
-    });
-  };
-
+      const txDate = dayjs(tx.date)
+      const startDate = filters.startDate ? dayjs(filters.startDate) : null
+      const endDate = filters.endDate ? dayjs(filters.endDate) : null
+  
+      if (startDate && txDate.isBefore(startDate.add(-1, 'day'), 'day')) return false
+      if (endDate && !txDate.isBefore(endDate, 'day')) return false
+  
+      if (
+        filters.categories.length > 0 &&
+        !filters.categories.some(cat => tx.categories.includes(cat))
+      ) return false
+  
+      if (
+        filters.description &&
+        !tx.description.toLowerCase().includes(filters.description.toLowerCase())
+      ) return false
+  
+      if (filters.minAmount !== '' && tx.amount < (filters.minAmount as number)) return false
+      if (filters.maxAmount !== '' && tx.amount > (filters.maxAmount as number)) return false
+  
+      return true
+    })
+  }
   const handleFiltersChange = useCallback((newFilters: TransactionFiltersValues) => {
     setFilters(newFilters);
   }, []);

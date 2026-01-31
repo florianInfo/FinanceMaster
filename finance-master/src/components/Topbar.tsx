@@ -8,6 +8,9 @@ import { useTransactions } from '@/contexts/TransactionsContext';
 import CurrencySelector from './CurrencySelector';
 import LanguageSelector from './LanguageSelector';
 import { useTranslations } from 'next-intl';
+import ConfirmModal from '@/components/ConfirmModal';
+import type { ModalConfigButton } from '@/types/ModalConfigButton';
+import type { Transaction } from '@/types/Transaction';
 
 const THEMES = [
   { name: 'dark-red', color: 'bg-black border-red-500' },
@@ -18,9 +21,140 @@ const THEMES = [
 
 export default function Topbar() {
   const t = useTranslations('Topbar');
+  const tTx = useTranslations('Transactions');
   const { setTheme } = useTheme();
   const { transactions, addTransactions } = useTransactions();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const confirmResolverRef = useRef<((value: boolean) => void) | null>(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [modalTitle, setModalTitle] = useState('');
+  const [modalMessage, setModalMessage] = useState('');
+  const [modalButtons, setModalButtons] = useState<ModalConfigButton[]>([]);
+
+  const openConfirmationModal = (title: string, message: string, buttons: ModalConfigButton[]) => {
+    setModalTitle(title);
+    setModalMessage(message);
+    setModalButtons(buttons);
+    setShowConfirmModal(true);
+  };
+
+  const resolveConfirm = (value: boolean) => {
+    const resolver = confirmResolverRef.current;
+    if (resolver) {
+      confirmResolverRef.current = null;
+      resolver(value);
+    }
+  };
+
+  const findSimilarByBaseCategory = (tx: Transaction, pool: Transaction[]) => {
+    return pool.filter(candidate =>
+      candidate.baseCategory === tx.baseCategory &&
+      candidate.description === tx.description &&
+      (candidate.amount < 0) === (tx.amount < 0)
+    );
+  };
+
+  const collectCategories = (txs: Transaction[]) => {
+    const unique = new Set<string>();
+    txs.forEach(tx => tx.categories?.forEach(cat => unique.add(cat)));
+    return Array.from(unique).filter(Boolean);
+  };
+
+  const haveSameCategories = (a: string[], b: string[]) => {
+    if (a.length !== b.length) return false;
+    const setA = new Set(a);
+    return b.every(cat => setA.has(cat));
+  };
+
+  const confirmApplySimilarCategories = (
+    description: string,
+    baseCategory: string,
+    isDebit: boolean,
+    similarCount: number,
+    importCount: number,
+    categories: string[]
+  ) => {
+    const categoriesLabel = categories.length > 0 ? categories.join(', ') : t('none');
+    const typeLabel = isDebit ? t('typeDebit') : t('typeCredit');
+    const message = [
+      t('sectionConcernedTitle'),
+      `- ${t('labelDescription')}: ${description}`,
+      `- ${t('labelBaseCategory')}: ${baseCategory}`,
+      `- ${t('labelType')}: ${typeLabel}`,
+      `- ${t('labelCount')}: ${importCount}`,
+      '',
+      t('sectionSimilarTitle'),
+      `- ${t('labelDescription')}: ${description}`,
+      `- ${t('labelCategories')}: ${categoriesLabel}`,
+      `- ${t('labelType')}: ${typeLabel}`,
+      `- ${t('labelCount')}: ${similarCount}`,
+      '',
+      t('confirmApplySimilarQuestion'),
+    ].join('\n');
+    return new Promise<boolean>((resolve) => {
+      confirmResolverRef.current = resolve;
+      openConfirmationModal(
+        t('confirmApplySimilarTitle'),
+        message,
+        [
+          { label: tTx('yes'), onClick: () => resolveConfirm(true), variant: 'primary' },
+          { label: tTx('no'), onClick: () => resolveConfirm(false), variant: 'secondary' },
+        ]
+      );
+    });
+  };
+
+  const applySimilarCategoriesOnImport = async (
+    newTxs: Transaction[],
+    existingTxs: Transaction[]
+  ): Promise<Transaction[]> => {
+    const updated = [...newTxs];
+    const grouped = new Map<string, number[]>();
+
+    const getKey = (tx: Transaction) =>
+      `${tx.baseCategory}||${tx.description}||${tx.amount < 0 ? 'debit' : 'credit'}`;
+
+    updated.forEach((tx, idx) => {
+      const key = getKey(tx);
+      const bucket = grouped.get(key);
+      if (bucket) {
+        bucket.push(idx);
+      } else {
+        grouped.set(key, [idx]);
+      }
+    });
+
+    for (const indices of grouped.values()) {
+      const representative = updated[indices[0]];
+      const similar = findSimilarByBaseCategory(representative, existingTxs);
+      if (similar.length === 0) continue;
+
+      const similarCategories = collectCategories(similar);
+      if (similarCategories.length === 0) continue;
+
+      const alreadySame = indices.every(idx =>
+        haveSameCategories(updated[idx].categories, similarCategories)
+      );
+      if (alreadySame) continue;
+
+      const apply = await confirmApplySimilarCategories(
+        representative.description,
+        representative.baseCategory,
+        representative.amount < 0,
+        similar.length,
+        indices.length,
+        similarCategories
+      );
+
+      if (apply) {
+        indices.forEach(idx => {
+          updated[idx] = { ...updated[idx], categories: similarCategories };
+        });
+      }
+    }
+
+    return updated;
+  };
 
   const handleDownload = () => {
     const data = { transactions: transactions };
@@ -51,8 +185,9 @@ export default function Topbar() {
       if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
         const lastId = Math.max(0, ...currentTransactions.map(t => parseInt(t.id)).filter(Number.isFinite));
         const parsed = parseCsvToTransactions(content, lastId);
-        addTransactions(parsed);
-        currentTransactions = [...currentTransactions, ...parsed];
+        const withSimilarCats = await applySimilarCategoriesOnImport(parsed, currentTransactions);
+        addTransactions(withSimilarCats);
+        currentTransactions = [...currentTransactions, ...withSimilarCats];
       } else if (file.type === 'application/json' || file.name.endsWith('.json')) {
         try {
           const parsed = JSON.parse(content);
@@ -73,8 +208,9 @@ export default function Topbar() {
               };
             });
 
-            addTransactions(normalized);
-            currentTransactions = [...currentTransactions, ...normalized];
+            const withSimilarCats = await applySimilarCategoriesOnImport(normalized, currentTransactions);
+            addTransactions(withSimilarCats);
+            currentTransactions = [...currentTransactions, ...withSimilarCats];
           }
         } catch (err) {
           console.error('Invalid JSON file:', err);
@@ -136,6 +272,14 @@ export default function Topbar() {
           onChange={handleFileUpload}
         />
       </div>
+
+      <ConfirmModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        title={modalTitle}
+        message={modalMessage}
+        buttons={modalButtons}
+      />
     </div>
   );
 }

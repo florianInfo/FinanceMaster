@@ -9,7 +9,20 @@
   "Topbar": {
     "export": "Export as JSON",
     "import": "Import one or more CSV or JSON files",
-    "theme": "Theme {name}"
+    "theme": "Theme {name}",
+    "confirmApplySimilarTitle": "Apply similar categories?",
+    "confirmApplySimilarMessage": "",
+    "sectionConcernedTitle": "Affected transaction(s)",
+    "sectionSimilarTitle": "Similar transactions",
+    "labelDescription": "Description",
+    "labelBaseCategory": "Base category",
+    "labelCategories": "Categories",
+    "labelType": "Type",
+    "labelCount": "Count",
+    "typeDebit": "Debit",
+    "typeCredit": "Credit",
+    "confirmApplySimilarQuestion": "Do you want to apply the same categories?",
+    "none": "None"
   },
   "Sidebar": {
     "appTitle": "FinanceMaster",

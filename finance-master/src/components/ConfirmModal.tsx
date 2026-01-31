@@ -41,7 +41,7 @@ export default function ConfirmModal({ isOpen, onClose, title, message, buttons 
         className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md space-y-4"
       >
         <h2 className="text-xl font-semibold text-black">{title}</h2>
-        <p className="text-gray-600">{message}</p>
+        <p className="text-gray-600 whitespace-pre-line">{message}</p>
 
         <div className="flex justify-end gap-2 mt-6 flex-wrap">
           {buttons.map((btn, idx) => (

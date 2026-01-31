@@ -8,6 +8,7 @@ export interface Transaction {
   date: string;            // ISO string
   description: string;
   categories: string[];  // <-- on stocke désormais des CategoryOption
+  baseCategory: string;  // catégorie telle qu'importée depuis le CSV
   amount: number;
   type: TransactionType;
 }

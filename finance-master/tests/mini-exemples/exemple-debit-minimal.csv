@@ -1,0 +1,9 @@
+Date;Description;Categorie;Debit;Credit;Solde
+"2026-01-06";Salaire;Paye;"0";"1800.0";"3800.0"
+"2026-01-05";Salaire;Paye;"0";"2000.0";"2000.0"
+"2026-01-04";Epicerie;Epicerie;"100.0";"0";"1900.0"
+"2026-01-03";Loyer;Logement;"400.0";"0";"1500.0"
+"2026-01-02";Virement;Transfert;"0";"500.0";"2000.0"
+"2026-01-01";Transport;Services;"200.0";"0";"1800.0"
+"2025-12-31";Epicerie;Epicerie;"75.0";"0";"1725.0"
+

@@ -22,12 +22,14 @@ export function parseCsvToTransactions(csvContent: string, lastId: number): Tran
     const rawDate = row['Date'];
     const rawDesc = row['Description'] || row['Libellé'] || '';
     const rawCategory = row['Categorie'] || row['Catégorie'] || 'Autre';
+    const baseCategory = String(rawCategory).trim();
 
     return {
       id: `${lastId + index + 1}`, // <- ID auto-incrémenté
       date: new Date(rawDate).toISOString().slice(0, 10),
       description: rawDesc.trim(),
       categories: rawCategory.split(',').map((c: string) => c.trim()).filter(Boolean),
+      baseCategory,
       amount,
       type,
     };

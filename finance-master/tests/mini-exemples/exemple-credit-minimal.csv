@@ -1,0 +1,9 @@
+Date;"Numero de Carte";Description;Categorie;Debit;Credit
+"2026-01-06";"************1111";Cafe;Restaurants;"12.5";"0"
+"2026-01-05";"************1111";Cafe;Restaurants;"10.0";"0"
+"2026-01-04";"************1111";Boulangerie;Epicerie;"20.0";"0"
+"2026-01-03";"************1111";Cinema;Divertissement;"30.0";"0"
+"2026-01-02";"************1111";Essence;"Carburant et essence";"40.0";"0"
+"2026-01-01";"************1111";Livre;Magasinage;"50.0";"0"
+"2025-12-31";"************1111";Essence;"Carburant et essence";"35.0";"0"
+

@@ -1,0 +1,138 @@
+{
+  "transactions": [
+    {
+      "id": "3",
+      "date": "2026-01-04",
+      "description": "Boulangerie",
+      "categories": [
+        "Epicerie"
+      ],
+      "baseCategory": "Epicerie",
+      "amount": -20,
+      "type": "debit"
+    },
+    {
+      "id": "4",
+      "date": "2026-01-03",
+      "description": "Cinema",
+      "categories": [
+        "Divertissement"
+      ],
+      "baseCategory": "Divertissement",
+      "amount": -30,
+      "type": "debit"
+    },
+    {
+      "id": "5",
+      "date": "2026-01-02",
+      "description": "Essence",
+      "categories": [
+        "Carburant et essence"
+      ],
+      "baseCategory": "Carburant et essence",
+      "amount": -40,
+      "type": "debit"
+    },
+    {
+      "id": "6",
+      "date": "2026-01-01",
+      "description": "Livre",
+      "categories": [
+        "Magasinage"
+      ],
+      "baseCategory": "Magasinage",
+      "amount": -50,
+      "type": "debit"
+    },
+    {
+      "id": "7",
+      "date": "2025-12-31",
+      "description": "Essence",
+      "categories": [
+        "Carburant et essence"
+      ],
+      "baseCategory": "Carburant et essence",
+      "amount": -35,
+      "type": "debit"
+    },
+    {
+      "id": "8",
+      "date": "2026-01-06",
+      "description": "Salaire",
+      "categories": [
+        "Paye",
+        "gft"
+      ],
+      "baseCategory": "Paye",
+      "amount": 1800,
+      "type": "credit"
+    },
+    {
+      "id": "9",
+      "date": "2026-01-05",
+      "description": "Salaire",
+      "categories": [
+        "Paye",
+        "gft"
+      ],
+      "baseCategory": "Paye",
+      "amount": 2000,
+      "type": "credit"
+    },
+    {
+      "id": "10",
+      "date": "2026-01-04",
+      "description": "Epicerie",
+      "categories": [
+        "Epicerie"
+      ],
+      "baseCategory": "Epicerie",
+      "amount": -100,
+      "type": "debit"
+    },
+    {
+      "id": "11",
+      "date": "2026-01-03",
+      "description": "Loyer",
+      "categories": [
+        "Logement"
+      ],
+      "baseCategory": "Logement",
+      "amount": -400,
+      "type": "debit"
+    },
+    {
+      "id": "12",
+      "date": "2026-01-02",
+      "description": "Virement",
+      "categories": [
+        "Transfert"
+      ],
+      "baseCategory": "Transfert",
+      "amount": 500,
+      "type": "credit"
+    },
+    {
+      "id": "13",
+      "date": "2026-01-01",
+      "description": "Transport",
+      "categories": [
+        "Services"
+      ],
+      "baseCategory": "Services",
+      "amount": -200,
+      "type": "debit"
+    },
+    {
+      "id": "14",
+      "date": "2025-12-31",
+      "description": "Epicerie",
+      "categories": [
+        "Epicerie"
+      ],
+      "baseCategory": "Epicerie",
+      "amount": -75,
+      "type": "debit"
+    }
+  ]
+}
